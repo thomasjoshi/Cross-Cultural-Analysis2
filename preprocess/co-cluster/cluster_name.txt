@@ -1,0 +1,12 @@
+ground_truth_2D_mat/Cluster973_tag.mat
+ground_truth_2D_mat/Cluster973_meme.mat
+ground_truth_2D_mat/Cluster149_tag.mat
+ground_truth_2D_mat/Cluster149_meme.mat
+ground_truth_2D_mat/Cluster19_tag.mat
+ground_truth_2D_mat/Cluster19_meme.mat
+ground_truth_2D_mat/Cluster1599_tag.mat
+ground_truth_2D_mat/Cluster1599_meme.mat
+ground_truth_2D_mat/Cluster116_tag.mat
+ground_truth_2D_mat/Cluster116_meme.mat
+ground_truth_2D_mat/Cluster2276_tag.mat
+ground_truth_2D_mat/Cluster2276_meme.mat
