@@ -1,0 +1,1 @@
+Speaker: Dr. Yiyang LiSTORING ENERGY AND INFORMATION USING ELECTROCHEMICAL ION INSERTIONDr. Yiyang Li of Sandia National Laboratories will describe how electrochemical ion insertion is used to store energy in lithium-ion batteries and store information for low-power neuromorphic computation, meeting our society's goals in energy storage and low-power computing.

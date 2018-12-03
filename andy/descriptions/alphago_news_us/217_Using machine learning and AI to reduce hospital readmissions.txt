@@ -1,0 +1,1 @@
+The introduction of cloud computing and machine learning is helping researchers identify ways to reduce hospital readmissions for chronic conditions and provide corresponding actionable guidelines for patient-provider teams.Learn more:http://blogs.msdn.com/b/msr_er/archiv...http://research.microsoft.com
