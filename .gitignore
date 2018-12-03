@@ -114,3 +114,9 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Andy's local files
+andy/audios/alphago_news_us/
+andy/audios/alphago_news_us_flac/
+andy/videos/
+andy/youtube-crawler-49ca7fc9987b.json
