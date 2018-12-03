@@ -4,17 +4,19 @@ from datetime import datetime
 from bs4 import BeautifulSoup
 
 
-def get_responses(keyword, num):
+def get_responses(keyword, num, duration=0, source=0):
+    durations = (0, 2, 3, 4, 5)
+    sources = ('', 'iqiyi', 'qq', 'sohu', 'youku', 'tudou', 'acfun', 'bilibili', 'ifeng', 'cntv', 'm1905')
     result = []
     page = 1
     while len(result) < num:
-        s = 'https://so.iqiyi.com/so/q_' + keyword + '_ctg__t_0_page_' + str(page) + '_p_1_qc_0_rd__site__m_1_bitrate_'
+        s = 'https://so.iqiyi.com/so/q_' + keyword + '_ctg__t_' + str(durations[duration]) + '_page_' + str(page) + '_p_1_qc_0_rd__site_' + sources[source] + '_m_1_bitrate_'
         response = requests.get(s)
         soup = BeautifulSoup(response.text, 'html.parser')
         video_items = soup.find_all('li', {'class': 'list_item'})
         for v in video_items:
             url = v.find({'a', 'href'})['href']
-            resp = requests.get(url)
+            resp = requests.get(url, headers={'User-Agent': 'Chrome/70.0.3538.110'})
             if resp.status_code == 200:
                 result.append((url, resp))
                 print('Got video %d / %d' % (len(result), num))
