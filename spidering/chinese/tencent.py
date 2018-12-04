@@ -1,5 +1,4 @@
 import requests
-import json
 from datetime import datetime
 from bs4 import BeautifulSoup
 
@@ -40,17 +39,3 @@ def parse(p):
     return {'url': url, 'title': title, 'description': description, 'duration': duration,
             'publish_time': publish_time, 'last_time': last_time, 'watches': watches,
             'poster': poster}
-
-    # url, response = p
-    # l = response.text[response.text.find('var VIDEO_INFO'):]
-    # l = l[l.find('{'):]
-    # pos = l.find('};')
-    # if pos == -1:
-    #     pos = l.find('}\n')
-    #     if pos == -1:
-    #         return
-    # l = l[:1 + pos]
-    # d = json.loads(l)
-    # publish_time = datetime.strptime(d['publish_date'], '%Y-%m-%d %H:%M:%S') if d['publish_date'] is not None else None
-    # last_time = datetime.strptime(d['modify_time'], '%Y-%m-%d %H:%M:%S') if d['publish_date'] is not None else None
-    # return {'url': url, 'title': d['title'], 'description': d['desc'], 'duration': int(d['duration']), 'publish_time': publish_time, 'last_time': last_time, 'watches': int(d['view_all_count']), 'poster': d['upload_qq'], 'id': d['vid']}

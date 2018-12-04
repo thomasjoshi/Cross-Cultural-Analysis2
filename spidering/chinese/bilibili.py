@@ -9,7 +9,8 @@ def get_responses(keyword, num, order=0, duration=0, tids_1=0, tids_2=0):
     result = []
     page = 1
     while len(result) < num:
-        s = 'https://search.bilibili.com/all?keyword=' + keyword + '&order=' + orders[order] + '&duration=' + str(duration) + '&tids_1=' + str(tids_1) + '&tids_2=' + str(tids_2) + '&page=' + str(page)
+        s = 'https://search.bilibili.com/all?keyword=' + keyword + '&order=' + orders[order] + '&duration=' + str(
+            duration) + '&tids_1=' + str(tids_1) + '&tids_2=' + str(tids_2) + '&page=' + str(page)
         response = requests.get(s)
         soup = BeautifulSoup(response.text, 'html.parser')
         video_items = soup.find_all('li', {'class': 'video matrix'})
@@ -35,4 +36,6 @@ def parse(p):
             l = l[:1 + l.find('};')]
             break
     d = json.loads(l)['videoData']
-    return {'url': url, 'title': d['title'], 'description': d['desc'], 'duration': d['duration'], 'publish_time': datetime.fromtimestamp(d['pubdate']), 'last_time': datetime.fromtimestamp(d['ctime']), 'poster': d['owner']['name'], 'id': d['aid']}
+    return {'url': url, 'title': d['title'], 'description': d['desc'], 'duration': d['duration'],
+            'publish_time': datetime.fromtimestamp(d['pubdate']), 'last_time': datetime.fromtimestamp(d['ctime']),
+            'poster': d['owner']['name'], 'id': d['aid']}
