@@ -5,9 +5,10 @@ import os
 from os import walk
 from pprint import pprint
 
-video_path = "./videos"
-trans_path = "./transcripts"
-image_folder = "./images"
+dataset_path = "AlphaGo"
+video_path = dataset_path + "/videos"
+trans_path = dataset_path + "/transcripts"
+image_folder = dataset_path + "/images"
 
 # read all file in the video path
 f_list = []
@@ -15,8 +16,7 @@ for (dirpath, dirnames, filenames) in walk(video_path):
     f_list.extend(filenames)
 f_list=["test.mp4"]
 
-
-sample_interval = 5
+sample_interval = 3
 start_sample_time = []
 end_sample_time = []
 start_time = []
@@ -40,7 +40,9 @@ for index,video_file in enumerate(f_list):
 			end = end_time[traverse_index]
 
 			while(traverse_index < len(data)-1):
-				if(end_time[traverse_index] - start_time >= sample_interval):
+				if(end_time[traverse_index] - start >= sample_interval):
+					if_end_exist = False
+					if_start_exist = False
 					try:
 						if_start_exist = start_sample_time.index(start)
 						if_end_exist = end_sample_time.index(end)
@@ -57,18 +59,29 @@ for index,video_file in enumerate(f_list):
 				end = end_time[traverse_index]
 				traverse_index += 1
 
+		print("Total number of interval: " + str(len(start_sample_time)))
+		#print(start_sample_time)
+
+		count = 0
 		capture = cv2.VideoCapture(full_video_path)
-		frameRate = cap.get(5) # get frame rate
-		while(cap.isOpened()):
-		    frameId = cap.get(1) # current frame number
-		    ret, frame = cap.read()
-		    if (ret != True):
+		frameRate = capture.get(5) # get frame rate
+		
+		while(capture.isOpened()):
+		    frameId = capture.get(1) # current frame number
+		    ret, frame = capture.read()
+		    key_frame = math.floor((start_time[count] - float(start_time[count] - end_time[count])/2) * frameRate)
+		    print(frameId,key_frame)
+		    if (ret != True or count >= len(start_sample_time)):
 		        break
-		    if (frameId % math.floor(frameRate) == 0):
-		        filename = imagesFolder + "/image_" +  str(int(frameId)) + ".jpg"
+		    if (frameId == key_frame):
+		        filename = image_folder + "/" + str(count) + ".jpg"
 		        cv2.imwrite(filename, frame)
-		cap.release()
-		print ("Finish Processing.")
+		        print("Write frame: " + filename)
+		        count += 1
+
+		capture.release()
+		print ("Finish processing file: " + full_video_path)
+
 	else:
 		print("File connot find: " + full_trans_path)
 
