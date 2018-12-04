@@ -20,7 +20,8 @@ import models.imagenet as customized_models
 
 from utils import *
 
-cudnn.benchmark = True
+torch.backends.cudnn.benchmark = True
+torch.backends.cudnn.enabled = True
 
 model_names = sorted(name for name in models.__dict__
     if name.islower() and not name.startswith("__")
