@@ -2,6 +2,7 @@
 .DS_Store
 
 # Byte-compiled / optimized / DLL files
+.pyc
 __pycache__/
 *.py[cod]
 *$py.class
@@ -14,13 +15,18 @@ profile_default/
 ipython_config.py
 
 # Swap files
-.swp
+~
+.*.swp
+
+# gcc output files
+*.o
+
+# word vec files
+*.bin
+*.vec
 
 # Backup files
 .bak
-
-# Pyre type checker
-.pyre/
 
 # Andy's local files
 andy/audios/alphago_news_us/
@@ -31,3 +37,7 @@ andy/youtube-crawler-49ca7fc9987b.json
 # Stanley's local files
 dataset/
 embedding/visual/checkpoint/
+embedding/text/fastText/models/
+embedding/text/fastText/data/
+embedding/text/fastText/result/
+embedding/text/fastText/fasttext
