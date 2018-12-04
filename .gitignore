@@ -35,7 +35,7 @@ andy/videos/
 andy/youtube-crawler-49ca7fc9987b.json
 
 # Stanley's local files
-dataset/
+dataset/AlphaGo/
 embedding/visual/checkpoint/
 embedding/text/fastText/models/
 embedding/text/fastText/data/
