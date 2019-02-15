@@ -14,9 +14,7 @@ def save_result(sorted_items, filename):
 
 
 if __name__ == '__main__':
-    filenames = (
-        'titles_iqiyi.txt', 'titles_qq.txt', 'titles_bilibili.txt', 'desc_iqiyi.txt', 'desc_qq.txt',
-        'desc_bilibili.txt')
+    filenames = ['descriptions.txt']
     result_filename = 'token_counts.txt'
     texts = (read_file(filename) for filename in filenames)
     tokens = Counter()
