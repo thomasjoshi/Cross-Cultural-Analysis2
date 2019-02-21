@@ -21,7 +21,9 @@ class Parser:
 
     def load_data(self, filename):
         with open(filename, 'rb') as f:
-            self.urls, self.data = pickle.load(f)
+            urls, data = pickle.load(f)
+            self.urls.update(urls)
+            self.data.update(data)
 
     def save_urls(self, filename, flag='w'):
         with open(filename, flag) as f:
@@ -40,11 +42,16 @@ class Parser:
         with open(filename, 'w') as f:
             f.writelines(v['title'] + '\n' for v in self.data.values() if v['title'] is not None)
 
-    def download(self, output_dir):
+    def download(self, output_dir, sources=(1, 2, 3, 4)):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        for i, url in enumerate(self.urls):
-            print(f'Downloading video {i + 1} / {len(self.urls)}')
+        urls = [url for url in self.urls
+                if 'bilibili.com' in url and 1 in sources
+                or 'qq.com' in url and 2 in sources
+                or 'iqiyi.com' in url and 3 in sources
+                or 'youku.com' in url and 4 in sources]
+        for i, url in enumerate(urls):
+            print(f'Downloading video {i + 1} / {len(urls)}')
             call(['you-get', '-o', output_dir, url])
 
     def get_data_from_url(self, url):
@@ -83,14 +90,14 @@ class Parser:
                 duration) + '&tids_1=' + str(tids_1) + '&tids_2=' + str(tids_2) + '&page=' + str(page)
             response = requests.get(s, headers=self.header)
             if response.status_code != 200:
-                print('Search failed: ' + url)
+                print('Search failed: ' + s)
                 return
             soup = BeautifulSoup(response.text, 'html.parser')
             video_items = soup.find_all('li', {'class': 'video matrix'})
             for v in video_items:
                 url = 'https://www.bilibili.com/video/' + v.find('span', {'class': 'type avid'}).text
                 resp = requests.head(url, headers=self.header)
-                if resp.status_code != 200 or url in self.urls:
+                if resp.status_code // 100 >= 4 or url in self.urls:
                     continue
                 self.urls.add(url)
                 count += 1
@@ -119,7 +126,7 @@ class Parser:
             s = 'https://v.qq.com/x/search/?q=' + query + '&cxt=%3Dduration%3D' + str(duration) + '&cur=' + str(page)
             response = requests.get(s, headers=self.header)
             if response.status_code != 200:
-                print('Search failed: ' + url)
+                print('Search failed: ' + s)
                 return
             soup = BeautifulSoup(response.text, 'html.parser')
             video_items = soup.find_all('div', {'class': 'result_item result_item_h _quickopen'})
@@ -128,7 +135,7 @@ class Parser:
                 if 'qq.com' not in url:
                     continue
                 resp = requests.head(url, headers=self.header)
-                if resp.status_code != 200 or url in self.urls:
+                if resp.status_code // 100 >= 4 or url in self.urls:
                     continue
                 self.urls.add(url)
                 count += 1
@@ -166,8 +173,10 @@ class Parser:
                           'poster': d['upload_qq']}
 
     # Iqiyi
-    def get_urls_iqiyi(self, query, num, source=1, duration=2):
+    def get_urls_iqiyi(self, query, num, source=1, duration=1):
         sources = ['', 'iqiyi', 'qq', 'sohu', 'youku', 'tudou', 'acfun', 'bilibili', 'ifeng', 'cntv', 'm1905']
+        if duration != 0:
+            duration += 1
         page = 1
         count = 0
         while count < num:
@@ -175,14 +184,14 @@ class Parser:
                 page) + '_p_1_qc_0_rd__site_' + sources[source] + '_m_1_bitrate_'
             response = requests.get(s, headers=self.header)
             if response.status_code != 200:
-                print('Search failed: ' + url)
+                print('Search failed: ' + s)
                 return
             soup = BeautifulSoup(response.text, 'html.parser')
             video_items = soup.find_all('li', {'class': 'list_item'})
             for v in video_items:
                 url = v.find({'a', 'href'})['href']
                 resp = requests.head(url, headers=self.header)
-                if resp.status_code != 200 or url in self.urls:
+                if resp.status_code // 100 >= 4 or url in self.urls:
                     continue
                 self.urls.add(url)
                 count += 1
@@ -211,16 +220,17 @@ class Parser:
         page = 1
         count = 0
         while count < num:
-            s = 'https://so.youku.com/search_video/q_' + query + '?aaid=0&lengthtype=' + str(duration) + '&pg=' + str(page)
+            s = 'https://so.youku.com/search_video/q_' + query + '?aaid=0&lengthtype=' + str(duration) + '&pg=' + str(
+                page)
             response = requests.get(s, headers=self.header)
             if response.status_code != 200:
-                print('Search failed: ' + url)
+                print('Search failed: ' + s)
                 return
             vids = list(set(re.findall(r'id_(.*?)\.html', response.text)))
             for vid in vids:
                 url = 'https://v.youku.com/v_show/id_' + vid + '.html'
                 resp = requests.head(url, headers=self.header)
-                if resp.status_code != 200 or url in self.urls:
+                if resp.status_code // 100 >= 4 or url in self.urls:
                     continue
                 self.urls.add(url)
                 count += 1
