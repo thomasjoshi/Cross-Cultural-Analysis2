@@ -42,17 +42,13 @@ class Parser:
         with open(filename, 'w') as f:
             f.writelines(v['title'] + '\n' for v in self.data.values() if v['title'] is not None)
 
-    def download(self, output_dir, sources=(1, 2, 3, 4)):
+    def download(self, output_dir, filters=('bilibili.com', 'qq.com', 'iqiyi.com', 'youku.com')):
         if not os.path.exists(output_dir):
             os.makedirs(output_dir)
-        urls = [url for url in self.urls
-                if 'bilibili.com' in url and 1 in sources
-                or 'qq.com' in url and 2 in sources
-                or 'iqiyi.com' in url and 3 in sources
-                or 'youku.com' in url and 4 in sources]
+        urls = [url for url in self.urls if any(s in url for s in filters)]
         for i, url in enumerate(urls):
             print(f'Downloading video {i + 1} / {len(urls)}')
-            call(['you-get', '-o', output_dir, url])
+            call(['you-get', '-f', '-o', output_dir, url])
 
     def get_data_from_url(self, url):
         # parses metadata from a single url, updates self.data
