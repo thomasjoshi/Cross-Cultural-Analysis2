@@ -1,15 +1,15 @@
 from parser import Parser
 import sys
 
-if len(sys.argv) < 3:
-    print('Usage: python3 script.py keyword source1 [source2] [...]')
-    print('For example: python3 download.py alphago iqiyi.com qq.com')
+if len(sys.argv) < 4:
+    print('Usage: python3 script.py keyword output_folder source1 [source2] [...]')
+    print('For example: python3 download.py alphago alphago_videos iqiyi.com qq.com')
     sys.exit(1)
 
 keyword = sys.argv[1]
-sources = sys.argv[2:]
+download_folder = sys.argv[2]
+sources = sys.argv[3:]
 data_filename = keyword + '_data'
-download_folder = keyword + '_videos'
 
 parser = Parser()
 parser.load_data(data_filename)
