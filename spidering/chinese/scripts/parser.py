@@ -48,7 +48,7 @@ class Parser:
         urls = [url for url in self.urls if any(s in url for s in filters)]
         for i, url in enumerate(urls):
             print(f'Downloading video {i + 1} / {len(urls)}')
-            call(['you-get', '-f', '-o', output_dir, url])
+            call(['you-get', '-o', output_dir, url])
 
     def get_data_from_url(self, url):
         # parses metadata from a single url, updates self.data
