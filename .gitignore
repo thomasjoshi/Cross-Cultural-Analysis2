@@ -35,8 +35,6 @@ andy/videos/
 andy/youtube-crawler-49ca7fc9987b.json
 
 # Stanley's local files
-report/
-trans/
 key/
 dataset/AlphaGo/
 embedding/visual/checkpoint/
