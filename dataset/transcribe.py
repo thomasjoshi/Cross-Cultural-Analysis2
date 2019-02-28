@@ -5,10 +5,13 @@ from os import walk
 from google.cloud.speech_v1p1beta1 import types, SpeechClient
 from google.cloud import storage
 
-parser = argparse.ArgumentParser(description='Transcribe: convert audio file to ranscripts')
+parser = argparse.ArgumentParser(description='Transcribe: convert audio file into text')
 parser.add_argument('--folder', type=str, default="english", help='language of the transcript')
 parser.add_argument('--dataset', type=str, default="AlphaGo", help='name of the news event')
 parser.add_argument('--audio_format', type=str, default=".flac", help='format of output audios')
+parser.add_argument('--gs_bucket', type=str, default="cross-culture-audios-stanley", help='google cloud storage bucket')
+parser.add_argument('--gs_dest', type=str, default="audios", help='google cloud storage folder for audio files')
+parser.add_argument('--threshold', type=float, default=0.85, help='threshold for dropping unconfident transcripts')
 opt = parser.parse_args()
 
 dataset_name = "./" + opt.dataset
@@ -37,7 +40,7 @@ class Transcriber:
     def __init__(self):
         self.client = SpeechClient()
         storage_client = storage.Client()
-        self.bucket_name = 'cross-culture-audios-stanley'
+        self.bucket_name = opt.gs_bucket
         self.bucket = storage_client.get_bucket(self.bucket_name)
 
     def translate_with_timestamps(self, gs_uri):
@@ -71,13 +74,13 @@ class Transcriber:
 
     def upload_to_gcs(self, filepath):
         filename = ntpath.basename(filepath)
-        gs_filepath = 'audios/%s' % filename
+        gs_filepath = opt.gs_dest + '/' + filename
         blob = self.bucket.blob(gs_filepath)
         blob.upload_from_filename(filepath)
         return self.generate_uri(gs_filepath)
 
     def delete_from_gcs(self, filename):
-        gs_filepath = 'audios/%s' % filename
+        gs_filepath = opt.gs_dest + '/' + filename
         self.bucket.delete_blob(gs_filepath)
 
     def generate_uri(self, filepath):
@@ -92,14 +95,14 @@ if __name__ == '__main__':
         a_list.extend(filenames)
 
     for index,audio_filename in enumerate(a_list):
-        if audio_filename[-5:] == audio_type and audio_filename[0] != '.':
+        if audio_filename[-len(audio_type):] == audio_type and audio_filename[0] != '.':
             print('===> Start uploding file: ' + audio_filename)
             gs_uri = transcriber.upload_to_gcs(audio_path + '/' + audio_filename)
             print('===> Finish uploading file: ' + audio_filename)
 
             try:
                 results = transcriber.translate_with_timestamps(gs_uri)
-                with open(transcript_path + '/' + audio_filename[:-5] + '.txt', 'w') as f:
+                with open(transcript_path + '/' + audio_filename[:-len(audio_type)] + '.txt', 'w') as f:
                     for item in results:
                         if len(item) == 4:
                             word,start_time,end_time,confidence  = item[0],item[1], item[2], item[3]
@@ -109,6 +112,10 @@ if __name__ == '__main__':
                                 f.write((word.encode('utf-8')+"\t{}\t{}\t{}\n".format(start_time,end_time,confidence)))
                         else:
                             trans,confidence = item[0], item[1]
+                            if confidence < opt.threshold:
+                                print("===> Confidence value too low, dropping this transcript")
+                                raise Exception('Confidence value too low!')
+
                             if opt.folder == 'english':
                                 f.write((trans+"\t{}\n".format(confidence)))
                                 print("--------------------------- transcript ---------------------------")
