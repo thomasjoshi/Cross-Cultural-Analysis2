@@ -1,14 +1,37 @@
 import os
+import argparse
 from os import walk
+from shutil import copyfile
 
-dataset_name = "./AlphaGo"
-dataset_path = dataset_name + "/english"
+parser = argparse.ArgumentParser(description='Transcode: process RAW vieo file from spider')
+parser.add_argument('--rename', type=int, default=1, help='rename the raw file')
+parser.add_argument('--split', type=int, default=1, help='split audio file from video file')
+parser.add_argument('--folder', type=str, default="english", help='sub folder in dataset')
+parser.add_argument('--dataset', type=str, default="AlphaGo", help='name of the news event')
+parser.add_argument('--video_format', type=str, default=".mp4", help='format of input videos')
+parser.add_argument('--audio_format', type=str, default=".flac", help='format of output audios')
+parser.add_argument('--sampling_rate', type=int, default=16000, help='sampling rate of ffmpeg')
+parser.add_argument('--audio_channel', type=int, default=1, help='default is mono channel')
+opt = parser.parse_args()
+
+def replace(parent):
+    for path, folders, files in os.walk(parent):
+        for f in files:
+            os.rename(os.path.join(path, f), os.path.join(path, f.replace(' ', '_')))
+        for i in range(len(folders)):
+            new_name = folders[i].replace(' ', '_')
+            os.rename(os.path.join(path, folders[i]), os.path.join(path, new_name))
+            folders[i] = new_name
+
+dataset_name = "./" + opt.dataset
+dataset_path = dataset_name + "/" + opt.folder
 raw_path = dataset_path + "/raws"
 video_path = dataset_path + "/videos"
 audio_path = dataset_path + "/audios"
 transcript_path = dataset_path + "/transcripts"
 
-video_type = '.mp4'
+video_type = opt.video_format
+audio_file = opt.audio_format
 
 if not os.path.exists(raw_path):
     print('Error: no file in the raw folder.')
@@ -22,19 +45,32 @@ if not os.path.exists(audio_path):
 if not os.path.exists(transcript_path):
     os.makedirs(transcript_path)
 
-r_list = []
+if opt.rename:
+    replace(raw_path)
 
-for (dirpath, dirnames, filenames) in walk(raw_path):
-    r_list.extend(filenames)
+    r_list = []
 
-count = 1
-for index,raw_filename in enumerate(r_list):
-    if raw_filename[-4:] == video_type:
+    for (dirpath, dirnames, filenames) in walk(raw_path):
+        r_list.extend(filenames)
+
+    count = 1
+    for index,raw_filename in enumerate(r_list):
+        if raw_filename[-4:] == video_type and raw_filename[0] != '.':
+            audio_filename = audio_path + '/' + str(count) + audio_file
+            video_filename = video_path + '/' + str(count) + video_type
+            copyfile(raw_path+'/'+raw_filename, video_filename)
+            count += 1
+
+if opt.split:
+    n_list = []
+    for (dirpath, dirnames, filenames) in walk(video_path):
+        n_list.extend(filenames)
+
+    for index,video_filename in enumerate(n_list):
         cmd = ' '
-        audio_filename = audio_path + '/' + str(count) + '.mp3'
-        video_filename = video_path + '/' + str(count) + video_type
-        os.rename(raw_path+'/'+raw_filename, video_filename)
-        #os.system(cmd.join(('cp',raw_path+'/'+raw_filename, video_path)))
-        #os.system(cmd.join(('mv',video_path+'/'+raw_filename, video_filename)))
-    	os.system(cmd.join(('ffmpeg -i',video_filename, '-f mp3 -ab 192000 -vn', audio_filename)))
-        count += 1
+        audio_filename = audio_path + '/' + video_filename[:-4] + audio_file
+        try:
+            os.system(cmd.join(('ffmpeg -y -i',video_path + '/' + video_filename, '-f flac -r ',str(opt.sampling_rate),' -ac ',str(opt.audio_channel), audio_filename)))
+        except Exception as e:
+            os.remove(video_path + '/' + video_filename)
+            print("===> file corrupted, automatically remove...")
