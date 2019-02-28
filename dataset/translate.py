@@ -15,6 +15,7 @@ opt = parser.parse_args()
 dataset_name = "./" + opt.dataset
 chinese_dataset_path = dataset_name + "/" + 'chinese'
 english_dataset_path = dataset_name + "/" + 'english'
+out_path = dataset_name + "/" + 'misc'
 
 chinese_trans_path = chinese_dataset_path + "/transcripts"
 english_trans_path = english_dataset_path + "/transcripts"
@@ -61,6 +62,16 @@ for index,trans_file in enumerate(eng_list):
             if len(words) == 4:
                 english_words.append(words[0])
 
+chi2eng_log = open(out_path + 'chi2eng.txt', 'w')
+english_log = open(out_path + 'english.txt', 'w')
+common_log = open(out_path + 'common.txt', 'w')
+unique_log = open(out_path + 'unique.txt', 'w')
+
+for i in range(len(chi2eng_words)):
+    chi2eng_log.write(chi2eng_words[i] + '\t' + chinese_words[i].encode('utf-8') + '\n')
+
+for i in range(len(english_words)):
+    english_words.write(english_words[i] + '\n')
+
 print(len(chi2eng_words))
 print(len(english_words))
-
