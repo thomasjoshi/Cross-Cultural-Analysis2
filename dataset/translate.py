@@ -6,11 +6,13 @@ import sys
 import jieba
 import argparse
 from os import walk
-from googletrans import Translator
+from google.cloud import translate
 
 parser = argparse.ArgumentParser(description='Translate Analysis: Simple code to see the effect of binlingual translation')
 parser.add_argument('--dataset', type=str, default="AlphaGo", help='name of the news event')
 opt = parser.parse_args()
+
+translate_client = translate.Client()
 
 dataset_name = "./" + opt.dataset
 chinese_dataset_path = dataset_name + "/" + 'chinese'
@@ -35,8 +37,6 @@ chinese_words = []
 chi2eng_words = []
 english_words = []
 
-translator = Translator()
-
 for index,trans_file in enumerate(chi_list):
     full_trans_path = chinese_trans_path + "/" + trans_file
     if(os.path.isfile(full_trans_path)):
@@ -46,11 +46,15 @@ for index,trans_file in enumerate(chi_list):
             words = line.split('\t')
             if len(words) == 2:
                 seg_list = list(jieba.cut(words[0], cut_all=False))
-                translations = translator.translate(seg_list, src='zh-CN', dest='en')
-                for translation in translations:
-                    print(translation.origin.encode('utf-8'), ' -> ', translation.text)
-                    chinese_words.append(translation.origin.encode('utf-8'))
-                    chi2eng_words.append(translation.text)
+                for text in seg_list:
+                    translation = translate_client.translate(
+                        text,
+                        source_language='zh-CN',
+                        target_language='en')
+
+                    print(u'{}->{}'.format(text,translation['translatedText']))
+                    chinese_words.append(u''.format(text))
+                    chi2eng_words.append(u''.format(translation['translatedText']))
 
 for index,trans_file in enumerate(eng_list):
     full_trans_path = english_trans_path + "/" + trans_file
