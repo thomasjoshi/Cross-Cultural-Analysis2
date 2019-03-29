@@ -1,15 +1,20 @@
 from parser import Parser
 import sys
 
+# query = '章莹颖'
+# keyword = 'yingying_zhang'
+# quantity = 200
+# init = True
+
 if len(sys.argv) < 5:
     print('Usage: python3 script.py query keyword quantity fresh_run?')
-    print('For example: python3 run_parser.py alphago alphago 150 True')
+    print('For example: python3 run_parser.py alphago alphago 150 y')
     sys.exit(1)
 
 query = sys.argv[1]
 keyword = sys.argv[2]
 quantity = int(sys.argv[3])
-init = sys.argv[4][0] == 'T'
+init = sys.argv[4][0].lower() == 'y'
 url_filename = keyword + '_urls.txt'
 data_filename = keyword + '_data'
 title_filename = keyword + '_titles.txt'

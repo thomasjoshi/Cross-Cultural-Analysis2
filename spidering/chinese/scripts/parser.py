@@ -48,7 +48,7 @@ class Parser:
         urls = [url for url in self.urls if any(s in url for s in filters)]
         for i, url in enumerate(urls):
             print(f'Downloading video {i + 1} / {len(urls)}')
-            call(['you-get', '-o', output_dir, url])
+            os.system('yes N | you-get -o ' + output_dir + ' ' + url)
 
     def get_data_from_url(self, url):
         # parses metadata from a single url, updates self.data
@@ -82,6 +82,8 @@ class Parser:
         page = 1
         count = 0
         while count < num:
+            prev_count = count
+            print(f'Page {page}')
             s = 'https://search.bilibili.com/all?keyword=' + query + '&order=' + orders[order] + '&duration=' + str(
                 duration) + '&tids_1=' + str(tids_1) + '&tids_2=' + str(tids_2) + '&page=' + str(page)
             response = requests.get(s, headers=self.header)
@@ -100,6 +102,8 @@ class Parser:
                 print(f'Got video URL {count} / {num}')
                 if count == num:
                     break
+            if count == prev_count:
+                break
             page += 1
 
     def get_data_from_url_bilibili(self, url):
@@ -119,6 +123,8 @@ class Parser:
         page = 1
         count = 0
         while count < num:
+            prev_count = count
+            print(f'Page {page}')
             s = 'https://v.qq.com/x/search/?q=' + query + '&cxt=%3Dduration%3D' + str(duration) + '&cur=' + str(page)
             response = requests.get(s, headers=self.header)
             if response.status_code != 200:
@@ -138,6 +144,8 @@ class Parser:
                 print(f'Got video URL {count} / {num}')
                 if count == num:
                     break
+            if count == prev_count:
+                break
             page += 1
 
     def get_data_from_url_tencent(self, url):
@@ -176,6 +184,8 @@ class Parser:
         page = 1
         count = 0
         while count < num:
+            prev_count = count
+            print(f'Page {page}')
             s = 'https://so.iqiyi.com/so/q_' + query + '_ctg__t_' + str(duration) + '_page_' + str(
                 page) + '_p_1_qc_0_rd__site_' + sources[source] + '_m_1_bitrate_'
             response = requests.get(s, headers=self.header)
@@ -194,6 +204,8 @@ class Parser:
                 print(f'Got video URL {count} / {num}')
                 if count == num:
                     break
+            if count == prev_count:
+                break
             page += 1
 
     def get_data_from_url_iqiyi(self, url):
@@ -216,6 +228,8 @@ class Parser:
         page = 1
         count = 0
         while count < num:
+            prev_count = count
+            print(f'Page {page}')
             s = 'https://so.youku.com/search_video/q_' + query + '?aaid=0&lengthtype=' + str(duration) + '&pg=' + str(
                 page)
             response = requests.get(s, headers=self.header)
@@ -233,6 +247,8 @@ class Parser:
                 print(f'Got video URL {count} / {num}')
                 if count == num:
                     break
+            if count == prev_count:
+                break
             page += 1
 
     def get_data_from_url_youku(self, url):
