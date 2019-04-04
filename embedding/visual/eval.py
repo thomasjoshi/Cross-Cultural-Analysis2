@@ -78,7 +78,6 @@ parser.add_argument('--workers', default='4', type=int,
                     help='number of threads for loading the dataset')
 parser.add_argument('--image_height', type=int, default=256, help='Height of input image, default=256')
 parser.add_argument('--image_width', type=int, default=256, help='Width of input image, default=256')
-parser.add_argument('--dataset', default = 'AlphaGo', help='Default dataset is AlphaGo')
 parser.add_argument('--root_dir', default = '../../dataset/', help='Default root directory for dataset')
 parser.add_argument('--save_option', default = 'npy', help='save option for feature vector')
 args = parser.parse_args()
@@ -103,7 +102,7 @@ def main():
     if not os.path.isdir(args.checkpoint):
         mkdir_p(args.checkpoint)
 
-    testset = DatasetFromFolder(args.root_dir + args.dataset, args.image_height, args.image_width)
+    testset = DatasetFromFolder(args.root_dir, args.image_height, args.image_width)
     testloader = data.DataLoader(dataset=testset, num_workers=args.workers, batch_size=args.test_batch, shuffle=False)
 
     # create model
@@ -148,7 +147,7 @@ def main():
 def test(testloader, model, epoch, use_cuda):
     batch_time = AverageMeter()
     data_time = AverageMeter()
-    save_path = args.root_dir + args.dataset+"/visual_features"
+    save_path = args.root_dir
     if not os.path.isdir(save_path):
         mkdir_p(save_path)
 

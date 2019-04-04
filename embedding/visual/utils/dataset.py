@@ -20,7 +20,7 @@ def is_image_file(filename):
 class DatasetFromFolder(data.Dataset):
     def __init__(self, data_dir, height, width):
         super(DatasetFromFolder, self).__init__()
-        self.image = join(data_dir, "image")
+        self.image = join(data_dir)
         #self.transcript = join(image_dir, "transcript")
         #self.description = join(image_dir, "description")
 
