@@ -1,5 +1,5 @@
 '''VGG for CIFAR10. FC layers are removed.
-(c) YANG, Wei 
+(c) YANG, Wei
 '''
 import torch.nn as nn
 import torch.utils.model_zoo as model_zoo
@@ -31,8 +31,11 @@ class VGG(nn.Module):
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
-        x = self.classifier(x)
+
         return x
+
+        #x = self.classifier(x)
+        #return x
 
     def _initialize_weights(self):
         for m in self.modules():
