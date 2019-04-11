@@ -67,6 +67,7 @@ with open(out_path+'/record.txt','w+') as f:
         feature_chi = np.load(filename_chi)
         for idxeng, filename_eng in enumerate(f_list_eng):
             feature_eng = np.load(filename_eng)
+
             l2_sim = find_similarity(feature_chi,feature_eng)
 
             if l2_sim < opt.threshold:

@@ -15,8 +15,10 @@ import torch.optim as optim
 import torch.utils.data as data
 import torchvision.transforms as transforms
 import torchvision.datasets as datasets
-import torchvision.models as models
-import models.imagenet as customized_models
+
+#import torchvision.models as models
+#import models.imagenet as customized_models
+import models.cifar as models
 
 from utils import *
 
@@ -106,7 +108,8 @@ def main():
     testloader = data.DataLoader(dataset=testset, num_workers=args.workers, batch_size=args.test_batch, shuffle=False)
 
     # create model
-    if args.pretrained:
+    #if args.pretrained:
+    if True:
         print("=> using pre-trained model '{}'".format(args.arch))
         model = models.__dict__[args.arch](pretrained=True)
     elif args.arch.startswith('resnext'):

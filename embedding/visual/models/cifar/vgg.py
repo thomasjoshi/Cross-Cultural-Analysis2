@@ -25,17 +25,24 @@ class VGG(nn.Module):
     def __init__(self, features, num_classes=1000):
         super(VGG, self).__init__()
         self.features = features
-        self.classifier = nn.Linear(512, num_classes)
+        #self.classifier = nn.Linear(512, num_classes)
+        self.classifier = nn.Sequential(
+            nn.Linear(512 * 7 * 7, 4096),
+            nn.ReLU(True),
+            nn.Dropout(),
+            nn.Linear(4096, 4096),
+            nn.ReLU(True),
+            nn.Dropout(),
+            #nn.Linear(4096, num_classes),
+        )
         self._initialize_weights()
 
     def forward(self, x):
         x = self.features(x)
         x = x.view(x.size(0), -1)
 
+        x = self.classifier(x)
         return x
-
-        #x = self.classifier(x)
-        #return x
 
     def _initialize_weights(self):
         for m in self.modules():

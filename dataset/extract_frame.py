@@ -146,7 +146,7 @@ for index,trans_file in enumerate(f_list):
 
         capture.release()
         print ("Finish processing file: " + full_video_path)
-        os.system('python /data/Cross_Cultural_Analysis/embedding/visual/eval.py -a vgg19_bn --epochs 90 --checkpoint checkpoint/cifar100/vgg19_bn --root_dir '+ out_frame_path + "/" + trans_file[:-len(opt.transcript_format)] + ' --save_option npy')
+        os.system('python /data/Cross_Cultural_Analysis/embedding/visual/eval.py -a vgg19_bn --epochs 90 --checkpoint checkpoint/vgg19_bn.pth --root_dir '+ out_frame_path + "/" + trans_file[:-len(opt.transcript_format)] + ' --save_option npy')
 
     else:
         print("File connot find: " + full_trans_path)
