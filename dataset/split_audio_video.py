@@ -17,30 +17,29 @@ parser.add_argument('--sampling_rate', type=int, default=16000, help='sampling r
 parser.add_argument('--audio_channel', type=int, default=1, help='default is mono channel')
 opt = parser.parse_args()
 
-def replace(parent):
-    for path, folders, files in os.walk(parent):
-        for f in files:
-            os.rename(os.path.join(path, f), os.path.join(path, f.replace(' ', '_')))
-        for i in range(len(folders)):
-            new_name = folders[i].replace(' ', '_')
-            os.rename(os.path.join(path, folders[i]), os.path.join(path, new_name))
-            folders[i] = new_name
-
 dataset_name = "./" + opt.dataset
 dataset_path = dataset_name + "/" + opt.folder
-raw_path = dataset_path + "/raws"
+raw_path_video = dataset_path + "/source/videos"
+raw_path_description = dataset_path + "/source/descriptions"
+description_path = dataset_path + "/descriptions"
 video_path = dataset_path + "/videos"
 audio_path = dataset_path + "/audios"
-tran_path = dataset_path + "/transcripts"
+trans_path = dataset_path + "/transcripts"
 
 video_type = opt.video_format
 audio_type = opt.audio_format
 
-if not os.path.exists(raw_path):
+if not os.path.exists(raw_path_video):
+    print('Error: no file in the raw folder.')
+
+if not os.path.exists(raw_path_description):
     print('Error: no file in the raw folder.')
 
 if not os.path.exists(video_path):
     os.makedirs(video_path)
+
+if not os.path.exists(description_path):
+    os.makedirs(description_path)
 
 if not os.path.exists(audio_path):
     os.makedirs(audio_path)
@@ -49,20 +48,35 @@ if not os.path.exists(trans_path):
     os.makedirs(trans_path)
 
 if opt.rename:
-    replace(raw_path)
 
     r_list = []
+    d_list = []
 
-    for (dirpath, dirnames, filenames) in walk(raw_path):
+    for (dirpath, dirnames, filenames) in walk(raw_path_video):
         r_list.extend(filenames)
+
+    for (dirpath, dirnames, filenames) in walk(raw_path_description):
+        d_list.extend(filenames)
+
 
     count = 1
     for index,raw_filename in enumerate(r_list):
         if raw_filename[-len(video_type):] == video_type and raw_filename[0] != '.':
-            audio_filename = audio_path + '/' + str(count) + audio_type
+            #audio_filename = audio_path + '/' + str(count) + audio_type
             video_filename = video_path + '/' + str(count) + video_type
-            copyfile(raw_path+'/'+raw_filename, video_filename)
-            count += 1
+
+            video_file_num  = raw_filename[:raw_filename.find('_')]
+
+            for idx,description_filename in enumerate(d_list):
+                des_file_num = description_filename[:description_filename.find('_')]
+
+                #print(title1, title2)
+                if video_file_num == des_file_num:
+                    desription_ori = raw_path_description + '/' + description_filename
+                    description_dst = description_path + '/' + str(count) + '.txt'
+                    copyfile(raw_path_video+'/'+raw_filename, video_filename)
+                    copyfile(desription_ori, description_dst)
+                    count += 1
 
 if opt.split:
     n_list = []

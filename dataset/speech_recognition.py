@@ -98,6 +98,9 @@ if __name__ == '__main__':
         a_list.extend(filenames)
 
     for index,audio_filename in enumerate(a_list):
+        trans_file = transcript_path + '/' + audio_filename[:-len(audio_type)] + '.txt'
+        if os.path.isfile(trans_file):
+            continue
         if audio_filename[-len(audio_type):] == audio_type and audio_filename[0] != '.':
             print('===> Start uploding file: ' + audio_filename)
             gs_uri = transcriber.upload_to_gcs(audio_path + '/' + audio_filename)
