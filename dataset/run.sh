@@ -8,4 +8,4 @@
 
 #python find_duplicate.py --dataset AlphaGo --feature_format npy --threshold 0.1
 
-python filter_ads.py --dataset AlphaGo --folder chinese
+python filter_ads.py --dataset AlphaGo --folder chinese --blacklist_threshold 30 --whitelist_threshold 20
