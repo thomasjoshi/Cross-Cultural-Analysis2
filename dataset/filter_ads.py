@@ -5,14 +5,17 @@ import math
 import os
 import re
 import collections
+import jieba
 import argparse
 from os import walk
 import nltk
 from nltk.stem.wordnet import WordNetLemmatizer
 from collections import Counter
 import matplotlib.pylab as plt
+import io
+import chardet
 
-lemmatizer = WordNetLemmatizer() 
+lemmatizer = WordNetLemmatizer()
 
 parser = argparse.ArgumentParser(description='extract_frame: extract frames and words')
 parser.add_argument('--folder', type=str, default="english", help='sub folder in dataset')
@@ -22,6 +25,7 @@ parser.add_argument('--transcript_format', type=str, default=".txt", help='forma
 parser.add_argument('--top_k', type=int, default=100, help='top words from blacklist of whitelist')
 parser.add_argument('--threshold', type=int, default=5, help='treshold for filtering out the videos')
 parser.add_argument('--blacklist', type=str, default='blacklist.txt', help='relative path for blacklist')
+parser.add_argument('--whitelist', type=str, default='whitelist.txt', help='relative path for whitelist')
 opt = parser.parse_args()
 print(opt)
 
@@ -31,8 +35,8 @@ video_path = dataset_path + "/videos"
 trans_path = dataset_path + "/transcripts"
 blacklist_path = dataset_path + '/' +  opt.blacklist
 
-def Diff(li1, li2): 
-    return (list(set(li1) - set(li2))) 
+def Diff(li1, li2):
+    return (list(set(li1) - set(li2)))
 
 blacklist_dict = {}
 with open(blacklist_path) as fr:
@@ -44,7 +48,9 @@ for index, line in enumerate(lines):
     if len(contents) < 2:
         continue
 
+
     bl_word, freq = contents[0], int(contents[1])
+    print(bl_word.decode('utf-8'), freq)
     blacklist_dict[bl_word] = freq
     if index + 1 >= opt.top_k:
         break
@@ -62,31 +68,40 @@ for index, trans_file in enumerate(f_list):
         lines = fr.read().splitlines()
 
     if len(lines) > 0:
+        for line in lines:
+            if len(line.split('\t')) == 2:
+                if opt.folder == 'english':
+                    remove_freq_list = lines[0].split()[:-2]
+                    content = ' '.join(remove_freq_list)
 
-        remove_freq_list = lines[0].split()[:-2]
-        content = ' '.join(remove_freq_list)
+                    text = nltk.word_tokenize(content)
+                    lemmatized_text = []
+                    for word in text:
+                        lemmatized_text.append(lemmatizer.lemmatize(word))
 
-        text = nltk.word_tokenize(content)
-        lemmatized_text = []
-        for word in text:
-            lemmatized_text.append(lemmatizer.lemmatize(word))
+                    #print(Diff(text,lemmatized_text))
 
-        #print(Diff(text,lemmatized_text))
+                    tagged = nltk.pos_tag(lemmatized_text)
+                    entities = nltk.chunk.ne_chunk(tagged)
 
-        tagged = nltk.pos_tag(lemmatized_text)
-        entities = nltk.chunk.ne_chunk(tagged)
+                    '''
+                    fdist = FreqDist(lemmatized_text)
+                    tab = fdist.tabulate(10, cumulative=False)
+                    fdist.plot(10, cumulative=False)
+                    '''
+                elif opt.folder == 'chinese':
+                    content = line.split('\t')[0]
+                    lemmatized_text = jieba.cut(content.decode('utf-8').encode('utf-8'), cut_all=False)
+                    #print(content.decode('utf-8').encode('utf-8'))
+                else:
+                    print('error: unacceptable folder name')
 
-        '''
-        fdist = FreqDist(lemmatized_text)
-        tab = fdist.tabulate(10, cumulative=False)
-        fdist.plot(10, cumulative=False)
-        '''
+                for word in lemmatized_text:
+                    freq_words[word] += 1
+                for word in blacklist_dict:
+                    ads_words[word] += 1
 
-        for word in lemmatized_text:
-            freq_words[word] += 1
-            if word in blacklist_dict:
-                ads_words[word] += 1
-
+#print(blacklist_dict)
 
 plt.figure()
 plt.bar(range(len(ads_words)), list(ads_words.values()), align='center', color='b')
@@ -103,7 +118,6 @@ for record in par_freq_words:
 non_ads_words= []
 for ads_word in ads_words:
     if ads_word in list_key:
-        print(ads_word)
         non_ads_words.append(ads_word)
 
 for naw in non_ads_words:
@@ -128,14 +142,32 @@ for index, trans_file in enumerate(f_list):
         lines = fr.read().splitlines()
 
     if len(lines) > 0:
+        for line in lines:
+            if len(line.split('\t')) == 2:
+                if opt.folder == 'english':
+                    remove_freq_list = lines[0].split()[:-2]
+                    content = ' '.join(remove_freq_list)
 
-        remove_freq_list = lines[0].split()[:-2]
-        content = ' '.join(remove_freq_list)
+                    text = nltk.word_tokenize(content)
+                    lemmatized_text = []
+                    for word in text:
+                        lemmatized_text.append(lemmatizer.lemmatize(word))
 
-        text = nltk.word_tokenize(content)
-        lemmatized_text = []
-        for word in text:
-            lemmatized_text.append(lemmatizer.lemmatize(word))
+                    #print(Diff(text,lemmatized_text))
+
+                    tagged = nltk.pos_tag(lemmatized_text)
+                    entities = nltk.chunk.ne_chunk(tagged)
+
+                    '''
+                    fdist = FreqDist(lemmatized_text)
+                    tab = fdist.tabulate(10, cumulative=False)
+                    fdist.plot(10, cumulative=False)
+                    '''
+                elif opt.folder == 'chinese':
+                    content = line[0]
+                    lemmatized_text = jieba.cut(content, cut_all=False)
+                else:
+                    print('error: unacceptable folder name')
 
         for word in lemmatized_text:
             if word in ads_words:
