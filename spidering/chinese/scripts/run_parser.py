@@ -1,8 +1,8 @@
 from parser import Parser
 import sys
 
-# query = '章莹颖'
-# keyword = 'yingying_zhang'
+# query = 'alphago'
+# keyword = 'alphago'
 # quantity = 200
 # init = True
 
@@ -15,6 +15,7 @@ query = sys.argv[1]
 keyword = sys.argv[2]
 quantity = int(sys.argv[3])
 init = sys.argv[4][0].lower() == 'y'
+
 url_filename = keyword + '_urls.txt'
 data_filename = keyword + '_data'
 title_filename = keyword + '_titles.txt'
@@ -23,13 +24,13 @@ download_folder = keyword + '_videos'
 
 parser = Parser()
 if init:
-    parser.get_urls_bilibili(query, quantity, order=0, duration=1, tids_1=0, tids_2=0)
+    parser.get_urls(Parser.BILIBILI, query, quantity)
     parser.save_urls(url_filename)
-    parser.get_urls_tencent(query, quantity, duration=1)
+    parser.get_urls(Parser.TENCENT, query, quantity)
     parser.save_urls(url_filename)
-    parser.get_urls_iqiyi(query, quantity, source=1, duration=1)
+    parser.get_urls(Parser.IQIYI, query, quantity)
     parser.save_urls(url_filename)
-    parser.get_urls_youku(query, quantity, duration=1)
+    parser.get_urls(Parser.YOUKU, query, quantity)
     parser.save_urls(url_filename)
     parser.get_data()
     parser.save_urls(url_filename)

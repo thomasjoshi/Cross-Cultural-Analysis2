@@ -1,5 +1,4 @@
 beautifulsoup4>=4.7.1
 jieba>=0.39
-matplotlib>=3.0.3
-requests>=2.21.0
-you-get>=0.4.1270
+requests>=2.22.0
+you-get>=0.4.1302
