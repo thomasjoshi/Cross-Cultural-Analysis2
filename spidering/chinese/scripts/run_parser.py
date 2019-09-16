@@ -1,41 +1,47 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
 from parser import Parser
-import sys
+import os
+import argparse
 
-# query = 'alphago'
-# keyword = 'alphago'
-# quantity = 200
-# init = True
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='get metadata for Chinese videos')
+    parser.add_argument('query', help='the query for videos')
+    parser.add_argument('-n', '--quantity', type=int, default=200, help='number of videos to collect')
+    parser.add_argument('-o', '--output', default='output', help='output directory')
+    parser.add_argument('-u', '--update', action='store_true', help='whether to start over or to update existing data')
+    args = parser.parse_args()
 
-if len(sys.argv) < 5:
-    print('Usage: python3 script.py query keyword quantity fresh_run?')
-    print('For example: python3 run_parser.py alphago alphago 150 y')
-    sys.exit(1)
+    query = args.query
+    quantity = args.quantity
+    output = args.output
+    update = args.update
 
-query = sys.argv[1]
-keyword = sys.argv[2]
-quantity = int(sys.argv[3])
-init = sys.argv[4][0].lower() == 'y'
+    if not os.path.exists(output):
+        os.makedirs(output)
 
-url_filename = keyword + '_urls.txt'
-data_filename = keyword + '_data'
-title_filename = keyword + '_titles.txt'
-desc_filename = keyword + '_descriptions.txt'
-download_folder = keyword + '_videos'
+    query_filename = os.path.join(output, 'query.txt')
+    url_filename = os.path.join(output, 'urls.txt')
+    data_filename = os.path.join(output, 'data')
+    title_filename = os.path.join(output, 'titles.txt')
+    desc_filename = os.path.join(output, 'descriptions.txt')
 
-parser = Parser()
-if init:
-    parser.get_urls(Parser.BILIBILI, query, quantity)
-    parser.save_urls(url_filename)
-    parser.get_urls(Parser.TENCENT, query, quantity)
-    parser.save_urls(url_filename)
-    parser.get_urls(Parser.IQIYI, query, quantity)
-    parser.save_urls(url_filename)
-    parser.get_urls(Parser.YOUKU, query, quantity)
-    parser.save_urls(url_filename)
-    parser.get_data()
-    parser.save_urls(url_filename)
-    parser.save_data(data_filename)
-else:
-    parser.load_data(data_filename)
-parser.export_titles(title_filename)
-parser.export_descriptions(desc_filename)
+    metadata_parser = Parser()
+    if update:
+        metadata_parser.load_data(data_filename)
+    metadata_parser.set_query(query)
+    metadata_parser.get_urls(Parser.BILIBILI, quantity)
+    metadata_parser.save_urls(url_filename)
+    metadata_parser.get_urls(Parser.TENCENT, quantity)
+    metadata_parser.save_urls(url_filename)
+    metadata_parser.get_urls(Parser.IQIYI, quantity)
+    metadata_parser.save_urls(url_filename)
+    metadata_parser.get_urls(Parser.YOUKU, quantity)
+    metadata_parser.save_urls(url_filename)
+    metadata_parser.get_data()
+    metadata_parser.save_urls(url_filename)
+    metadata_parser.save_data(data_filename)
+
+    metadata_parser.export_query(query_filename)
+    metadata_parser.export_titles(title_filename)
+    metadata_parser.export_descriptions(desc_filename)

@@ -1,21 +1,23 @@
+#!/usr/bin/env python3
+# -*- coding: UTF-8 -*-
 from parser import Parser
-import sys
+import argparse
+import os
 
-# keyword = 'yingying_zhang'
-# download_folder = 'yingying_zhang_videos'
-# sources = ['bilibili.com']
-# data_filename = keyword + '_data'
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='download videos using metadata')
+    parser.add_argument('input', help='input metadata file')
+    parser.add_argument('-o', '--output', default='output', help='output directory')
+    parser.add_argument('-s', '--sources', nargs='*', help='filter sources')
+    args = parser.parse_args()
 
-if len(sys.argv) < 4:
-    print('Usage: python3 script.py keyword output_folder source1 [source2] [...]')
-    print('For example: python3 download.py alphago alphago_videos iqiyi.com qq.com')
-    sys.exit(1)
+    input_file = args.input
+    output = args.output
+    sources = args.sources
 
-keyword = sys.argv[1]
-download_folder = sys.argv[2]
-sources = sys.argv[3:]
-data_filename = keyword + '_data'
+    if not os.path.exists(output):
+        os.makedirs(output)
 
-parser = Parser()
-parser.load_data(data_filename)
-parser.download(download_folder, filters=tuple(sources))
+    parser = Parser()
+    parser.load_data(input_file)
+    parser.download(output, sources)
