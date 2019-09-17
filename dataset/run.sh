@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 #python split_audio_video.py --rename 1 --split 1 --dataset AlphaGo --folder english
 #python split_audio_video.py --rename 1 --split 1 --dataset AlphaGo --folder chinese
 
