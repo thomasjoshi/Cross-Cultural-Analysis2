@@ -60,7 +60,7 @@ def plot_topic(topic, trend_data, rolling):
         rolling_data[topic].plot(label=f'{topic}_rolling_{rolling}')
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='analyze topic trends using Google Trends')
     parser.add_argument('-i', '--input', help='input topics')
     parser.add_argument('-a', '--additional', nargs='*', help='additional topics')
@@ -112,3 +112,7 @@ if __name__ == '__main__':
             plot_topic(topic, trend_data, rolling)
         plt.legend()
         plt.show()
+
+
+if __name__ == '__main__':
+    main()
