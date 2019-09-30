@@ -29,14 +29,14 @@ if __name__ == '__main__':
 
     if result_filename:
         dirname = os.path.dirname(result_filename)
-        if not os.path.exists(dirname):
+        if not os.path.isdir(dirname):
             os.makedirs(dirname)
         with open(result_filename, 'w') as f:
             f.writelines(k + '\t' + str(v) + '\n' for k, v in sorted_items)
 
     if png_filename:
         dirname = os.path.dirname(png_filename)
-        if not os.path.exists(dirname):
+        if not os.path.isdir(dirname):
             os.makedirs(dirname)
         counts = [c[1] for c in sorted_items]
         plt.loglog(range(1, 1 + len(counts)), counts, 'o')

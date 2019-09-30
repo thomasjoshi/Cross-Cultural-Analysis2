@@ -15,7 +15,7 @@ if __name__ == '__main__':
     output = args.output
     sources = args.sources
 
-    if not os.path.exists(output):
+    if not os.path.isdir(output):
         os.makedirs(output)
 
     parser = Spider()

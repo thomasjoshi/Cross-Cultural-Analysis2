@@ -17,7 +17,7 @@ if __name__ == '__main__':
     output = args.output
     update = args.update
 
-    if not os.path.exists(output):
+    if not os.path.isdir(output):
         os.makedirs(output)
 
     query_filename = os.path.join(output, 'query.txt')

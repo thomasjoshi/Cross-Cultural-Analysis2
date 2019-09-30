@@ -1,152 +1,69 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-
 import cv2
-import math
 import os
 import argparse
-from os import walk
-import numpy as np
+import json
+import matplotlib.pyplot as plt
+import pickle
 
-parser = argparse.ArgumentParser(description='extract_frame: extract frames and words')
-parser.add_argument('--folder', type=str, default="english", help='sub folder in dataset')
-parser.add_argument('--dataset', type=str, default="AlphaGo", help='name of the news event')
-parser.add_argument('--video_format', type=str, default=".mp4", help='format of input videos')
-parser.add_argument('--transcript_format', type=str, default=".txt", help='format of output audios')
-parser.add_argument('--interval', type=int, default=5, help='length of sampling interval')
-parser.add_argument('--threshold', type=float, default=150, help='treshold of inter frame differences')
-opt = parser.parse_args()
+if __name__ == '__main__':
+    parser = argparse.ArgumentParser(description='Extract frames from videos and transcripts')
+    parser.add_argument('trans_dir', help='directory of transcripts to process')
+    parser.add_argument('video_dir', help='directory of videos to process')
+    parser.add_argument('-o', '--output', help='directory of frames to output')
+    parser.add_argument('-d', '--data', default='data', help='path of output data')
+    parser.add_argument('-a', '--append', action='store_true', help='whether to append to existing results')
+    args = parser.parse_args()
 
-dataset_name = "./" + opt.dataset
-dataset_path = dataset_name + "/" + opt.folder
-video_path = dataset_path + "/videos"
-trans_path = dataset_path + "/transcripts"
-out_frame_path = dataset_path + "/frames"
-out_text_path = dataset_path + "/texts"
+    trans_type = 'json'
+    frame_type = 'jpg'
+    trans_dir = args.trans_dir
+    video_dir = args.video_dir
+    frame_dir = args.output
+    data_path = args.data
+    append = args.append
 
-video_type = opt.video_format
-
-if not os.path.exists(trans_path):
-    print('Error: no file in the transcript folder.')
-
-if not os.path.exists(out_frame_path):
-    os.makedirs(out_frame_path)
-
-if not os.path.exists(out_text_path):
-    os.makedirs(out_text_path)
-
-# read all file in the video path
-f_list = []
-for (dirpath, dirnames, filenames) in walk(trans_path):
-    f_list.extend(filenames)
-
-sample_interval = opt.interval
-
-for index,trans_file in enumerate(f_list):
-    print(u'Now processing: {}'.format(trans_file))
-    samples = []
-    start_time = []
-    end_time = []
-    word_buffer = []
-
-    video_file = trans_file[:-len(opt.transcript_format)] + video_type
-    full_video_path = video_path + "/" + video_file
-    full_trans_path = trans_path + "/" + trans_file
-    if(os.path.isfile(full_trans_path)):
-        fp = open(full_trans_path)
-        lines = fp.read().split("\n")
-        for line in lines:
-            words = line.split('\t')
-            if len(words) == 4:
-                word_buffer.append(words[0])
-                start_time.append(float(words[1]))
-                end_time.append(float(words[2]))
-                #confidence.append(float(words[3]))
-
-        traverse_index = 0
-        old_traverse_index = traverse_index
-
-        while traverse_index < len(word_buffer):
-            sample_words = ""
-            is_jump = False
-            t1 = start_time[traverse_index]
-            t2 = end_time[traverse_index]
-
-            while(traverse_index < len(word_buffer) and end_time[traverse_index] - t1 < sample_interval):
-                is_jump = True
-                sample_words += word_buffer[traverse_index]
-                t2 = end_time[traverse_index]
-                traverse_index += 1
-
-            if is_jump == True:
-                is_jump = False
-                traverse_index = old_traverse_index + int(opt.interval)
-
-            traverse_index += 1 # arbitrarily skip n words
-            old_traverse_index = traverse_index
-
-            samples.append([t1,t2,sample_words])
-
-        print("===> Total number of interval: " + str(len(samples)))
-
-        '''
-        for sample in samples:
-            print(sample[2].decode('utf-8').encode('utf-8'))
-        exit()
-        '''
-
-        capture = cv2.VideoCapture(full_video_path)
-        frameRate = capture.get(5) # get frame rate
-
-        idx = 0
-        count = 0
-        is_ready = True
-        last_frame = -1
-
-        while(capture.isOpened() and idx < len(samples)):
-            frameId = capture.get(1)
-            ret, frame = capture.read()
-
-            if frameId == last_frame:
-                break
-            else:
-                last_frame = frameId
-
-            if (frameId <= samples[idx][1] * frameRate and frameId >= samples[idx][0] * frameRate):
-                is_ready = False
-                if frameId % round(frameRate) == 0:
-                #if np.sum( np.absolute(frame-last_frame) )/np.size(frame) > opt.threshold:
-                    out_filename = '_'.join([str(int(samples[idx][0])),str(int(samples[idx][1]))])
-                    out_img_filename = out_frame_path + "/" + trans_file[:-len(opt.transcript_format)] + "/" + out_filename + "_" + str(count) + ".jpg"
-                    if not os.path.exists(out_frame_path + "/" + trans_file[:-len(opt.transcript_format)]):
-                        os.makedirs(out_frame_path + "/" + trans_file[:-len(opt.transcript_format)])
-                    cv2.imwrite(out_img_filename, frame)
-                    count += 1
-                    print("Writing frame: " + out_img_filename)
-
-            if (not is_ready and frameId > samples[idx][1] * frameRate):
-                try:
-                    out_trans_filename = out_text_path + "/" + trans_file[:-len(opt.transcript_format)] + "/" + out_filename + ".txt"
-                    if not os.path.exists(out_text_path + "/" + trans_file[:-len(opt.transcript_format)]):
-                        os.makedirs(out_text_path + "/" + trans_file[:-len(opt.transcript_format)])
-                    fw = open(out_trans_filename, 'w')
-                    if opt.folder == "english":
-                        fw.write(samples[idx][2]+'\n')
-                    else:
-                        fw.write(samples[idx][2].decode('utf-8').encode('utf-8')+'\n')
-                    fw.close()
-                except NameError:
-                    print("No keyframe above threshold found...")
-
-                count = 0
-                is_ready = True
-
-            while idx < len(samples) and frameId > samples[idx][0] * frameRate and is_ready:
-                idx += 1
-
-        capture.release()
-        print ("Finish processing file: " + full_video_path)
-        os.system('python /data/Cross_Cultural_Analysis/embedding/visual/eval.py -a vgg19_bn --epochs 90 --checkpoint checkpoint/vgg19_bn.pth --root_dir '+ out_frame_path + "/" + trans_file[:-len(opt.transcript_format)] + ' --save_option npy')
-
+    if not os.path.isdir(frame_dir):
+        os.makedirs(frame_dir)
+    data_dir = os.path.dirname(data_path)
+    if append and os.path.isfile(data_path):
+        with open(data_path, 'rb') as f:
+            image_text_pairs = pickle.load(f)
     else:
-        print("File connot find: " + full_trans_path)
+        image_text_pairs = []
+        if not os.path.isdir(data_dir):
+            os.makedirs(data_dir)
+
+    for video_filename in os.listdir(video_dir):
+        video_path = os.path.join(video_dir, video_filename)
+        if not os.path.isfile(video_path):
+            continue
+        dot_pos = video_filename.rfind('.')
+        trans_filename_without_postfix = video_filename[:dot_pos] if dot_pos != -1 else video_filename
+        trans_filename = trans_filename_without_postfix + '.' + trans_type
+        trans_path = os.path.join(trans_dir, trans_filename)
+        if not os.path.isfile(trans_path):
+            continue
+        print('Now processing: ' + trans_filename)
+        with open(trans_path) as f:
+            trans_info = json.load(f)
+        capture = cv2.VideoCapture(video_path)
+
+        for sentence_info in trans_info:
+            for word_info in sentence_info['words']:
+                ms = (word_info['start'] + word_info['end']) / 2 * 1000
+                capture.set(cv2.CAP_PROP_POS_MSEC, ms)
+                ms = capture.get(cv2.CAP_PROP_POS_MSEC)
+                frame = capture.read()[1]
+                image_text_pairs.append((frame, word_info['word']))
+                if not frame_dir:
+                    continue
+                cleaned_word = ''.join(c if c.isalnum() else '-' for c in word_info['word'])
+                frame_filename = '_'.join([trans_filename_without_postfix, str(round(ms)), cleaned_word]) + \
+                                 '.' + frame_type
+                frame_path = os.path.join(frame_dir, frame_filename)
+                plt.imsave(frame_path, frame)
+        capture.release()
+    with open(data_path, 'wb') as f:
+        pickle.dump(image_text_pairs, f)

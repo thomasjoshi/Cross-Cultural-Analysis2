@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 import pickle
 import os
+import subprocess
 import requests
 from bs4 import BeautifulSoup
 from datetime import datetime
@@ -68,14 +69,14 @@ class Spider:
             f.writelines(Spider.MARK + k + '\n' + v['title'] + '\n' for k, v in self.data['metadata'].items() if v['title'])
 
     def download(self, output_dir, filters=None):
-        if not os.path.exists(output_dir):
+        if not os.path.isdir(output_dir):
             os.makedirs(output_dir)
         urls = self.data['urls'] if not filters else [url for url in self.data['urls'] if
                                                       any(s in url for s in filters)]
         for i, url in enumerate(urls):
             vid = self.get_source_and_vid(url)[1]
             print(f'Downloading video {i + 1} / {len(urls)}')
-            os.system('you-get -o ' + output_dir + ' -O ' + vid + ' ' + url)
+            subprocess.call(['you-get', '-o', output_dir, '-O', vid, url])
 
     def get_urls(self, source, num, duration=1, order=0, tids_1=0, tids_2=0, scr=1):
         bilibili_orders = ['totalrank', 'click', 'pubdate', 'dm', 'stow']

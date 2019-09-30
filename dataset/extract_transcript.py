@@ -2,6 +2,7 @@
 # -*- coding: UTF-8 -*-
 import os
 import ntpath
+import json
 import argparse
 from google.cloud.speech_v1p1beta1 import types, SpeechClient
 from google.cloud import storage
@@ -27,15 +28,15 @@ class Transcriber:
         results = []
         for result in operation.result().results:
             alternatives = result.alternatives
-            if len(alternatives) == 0:
+            if not alternatives:
                 continue
             alternative = alternatives[0]
             results.append([alternative.transcript, alternative.confidence])
             for word_info in alternative.words:
                 word = word_info.word
-                start_time = word_info.start_time.seconds + round(word_info.start_time.nanos * 1e-9, 1)
-                end_time = word_info.end_time.seconds + round(word_info.end_time.nanos * 1e-9, 1)
-                confidence = round(word_info.confidence, 4)
+                start_time = word_info.start_time.seconds + word_info.start_time.nanos * 1e-9
+                end_time = word_info.end_time.seconds + word_info.end_time.nanos * 1e-9
+                confidence = word_info.confidence
                 results.append([word, start_time, end_time, confidence])
         return results
 
@@ -53,7 +54,7 @@ class Transcriber:
         return 'gs://' + os.path.join(self.gs_bucket, gs_path)
 
 
-if __name__ == '__main__':
+def main():
     parser = argparse.ArgumentParser(description='Extract transcripts from audios')
     parser.add_argument('input', help='directory of audios to process')
     parser.add_argument('key', help='key file for google cloud api')
@@ -66,66 +67,70 @@ if __name__ == '__main__':
     parser.add_argument('-s', '--threshold', type=float, default=0.85,
                         help='threshold for dropping unconfident transcripts')
     parser.add_argument('-t', '--hint', nargs='*', help='hint words for speech recognition')
+    parser.add_argument('-r', '--replace', action='store_true', help='whether to replace existing results')
     args = parser.parse_args()
 
-    transcript_type = 'txt'
+    trans_type = 'json'
     audio_dir = args.input
     key_file = args.key
     gs_bucket = args.gs_bucket
-    transcript_dir = args.output
+    trans_dir = args.output
     mode = 'cmn-Hans-CN' if args.language[0].lower() == 'c' else 'en-US'
     audio_type = args.audio_format
     gs_dir = args.gs_dir
     threshold = args.threshold
     hint = args.hint if args.hint else []
+    replace = args.replace
 
-    if not os.path.exists(transcript_dir):
-        os.makedirs(transcript_dir)
+    if not os.path.isdir(trans_dir):
+        os.makedirs(trans_dir)
 
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = key_file
     transcriber = Transcriber(gs_bucket, gs_dir)
-    with open(os.path.join(transcript_dir, 'error_log.txt'), 'w') as f_log:
+    with open(os.path.join(trans_dir, 'error_log.txt'), 'w') as f_log:
         for audio_filename in os.listdir(audio_dir):
             audio_path = os.path.join(audio_dir, audio_filename)
             if not (audio_filename.endswith('.' + audio_type) and os.path.isfile(audio_path)):
                 continue
             dot_pos = audio_filename.rfind('.')
-            transcript_filename = audio_filename[:dot_pos] + '.' + transcript_type
-            transcript_path = os.path.join(transcript_dir, transcript_filename)
-            if os.path.isfile(transcript_path):
+            transcript_filename = audio_filename[:dot_pos] + '.' + trans_type
+            transcript_path = os.path.join(trans_dir, transcript_filename)
+            if not replace and os.path.isfile(transcript_path):
                 continue
 
             print('===> Start uploding file: ' + audio_filename)
             gs_uri = transcriber.upload_to_gcs(audio_path)
             print('===> Finish uploading file: ' + audio_filename)
             try:
-                results = transcriber.translate_with_timestamps(gs_uri, audio_type.upper(), mode, hint)
-                with open(transcript_path, 'w') as f:
-                    skip = False
-                    first = True
-                    for item in results:
-                        if len(item) == 2:
-                            trans, confidence = item
-                            if confidence < threshold:
-                                print('===> Confidence value too low, dropping this transcript')
-                                skip = True
-                                continue
-                            if not first:
-                                f.write('\n')
-                            else:
-                                first = False
-                            if skip:
-                                skip = False
-                            f.write(f'{trans}\t{confidence}\n')
-                            print('--------------------------- transcript ---------------------------')
-                            print(trans)
-                            print('--------------------------- confidence ---------------------------')
-                            print(confidence)
-                        elif not skip:
-                            word, start_time, end_time, confidence = item
-                            f.write(f'{word}\t{start_time}\t{end_time}\t{confidence}\n')
+                transcriber_results = transcriber.translate_with_timestamps(gs_uri, audio_type.upper(), mode, hint)
+                result = []
+                skip = False
+                for item in transcriber_results:
+                    if len(item) == 2:
+                        trans, confidence = item
+                        if confidence < threshold:
+                            print('===> Confidence value too low, dropping this transcript')
+                            skip = True
+                            continue
+                        if skip:
+                            skip = False
+                        result.append({'transcript': trans, 'confidence': confidence, 'words': []})
+                        print('--------------------------- transcript ---------------------------')
+                        print(trans)
+                        print('--------------------------- confidence ---------------------------')
+                        print(confidence)
+                    elif not skip:
+                        word, start_time, end_time, confidence = item
+                        result[-1]['words'].append(
+                            {'word': word, 'start': start_time, 'end': end_time, 'confidence': confidence})
+                    with open(transcript_path, 'w') as f:
+                        json.dump(result, f)
             except Exception as e:
                 print('===> Error: writing log...')
                 f_log.write(audio_filename + str(e) + '\n')
             print('===> Delete file: ' + audio_filename)
             transcriber.delete_from_gcs(audio_filename)
+
+
+if __name__ == '__main__':
+    main()
