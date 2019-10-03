@@ -1,0 +1,10 @@
+beautifulsoup4>=4.8.0
+google-cloud-speech>=1.2.0
+google-cloud-storage>=1.20.1
+jieba>=0.39
+matplotlib>=3.1.1
+opencv-python>=4.1.1.26
+pandas>=0.25.1
+pytrends>=4.7.1
+requests>=2.22.0
+you-get>=0.4.1355
