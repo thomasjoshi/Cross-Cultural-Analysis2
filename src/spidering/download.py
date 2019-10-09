@@ -9,7 +9,7 @@ def download(input_file, output='output', sources=None):
     if not os.path.isdir(output):
         os.makedirs(output)
     spider = Spider()
-    spider.load_metadata(input_file)
+    spider.load(input_file)
     spider.download(output, sources)
 
 
