@@ -2,9 +2,12 @@
 src="$(dirname $0)/src"
 results="$(dirname $0)/results"
 
+# find topics
+python3 $src/analysis/find_topics.py $results/find_topics/topics_cn.txt key.txt $results/find_topics/topics_en.txt -o $results/find_topics -n 1 -f 10
+
 # get video metadata
-python3 $src/spidering/get_metadata.py "AlphaGo" -n 2 -o $results/AlphaGo/chinese/video_metadata -s bilibili qq iqiyi youku
-python3 $src/spidering/get_metadata.py "AlphaGo" -n 2 -o $results/AlphaGo/english/video_metadata -s youtube -k key.txt
+python3 $src/spidering/get_metadata.py "AlphaGo" -n 1 -o $results/AlphaGo/chinese/video_metadata -s bilibili qq iqiyi youku
+python3 $src/spidering/get_metadata.py "AlphaGo" -n 1 -o $results/AlphaGo/english/video_metadata -s youtube -k key.txt
 
 # download videos
 python3 $src/spidering/download.py $results/AlphaGo/chinese/video_metadata/metadata -o $results/AlphaGo/chinese/videos -s bilibili
@@ -21,9 +24,15 @@ python3 $src/dataset/extract_audio.py $results/AlphaGo/english/videos -o $result
 python3 $src/dataset/extract_transcript.py $results/AlphaGo/chinese/audios key.json cross-culture-audios-stanley -o $results/AlphaGo/chinese/transcripts -l cmn-Hans-CN -d audios_cn -t "AlphaGo" "AlphaZero" "DeepMind"
 python3 $src/dataset/extract_transcript.py $results/AlphaGo/english/audios key.json cross-culture-audios-stanley -o $results/AlphaGo/english/transcripts -l en-US -d audios_en -t "AlphaGo" "Lee Sedol" "Ke Jie"
 
-python3 $src/dataset/extract_frame.py $results/AlphaGo/chinese/transcripts $results/AlphaGo/chinese/videos -o $results/AlphaGo/chinese/frames -d $results/AlphaGo/chinese/image_text_pairs
-python3 $src/dataset/extract_frame.py $results/AlphaGo/english/transcripts $results/AlphaGo/english/videos -o $results/AlphaGo/english/frames -d $results/AlphaGo/english/image_text_pairs
+python3 $src/dataset/process_transcript.py $results/AlphaGo/chinese/transcripts -o $results/AlphaGo/chinese/processed_transcript.json
+python3 $src/dataset/process_transcript.py $results/AlphaGo/english/transcripts -o $results/AlphaGo/english/processed_transcript.json
 
-#python find_duplicate.py --dataset AlphaGo --feature_format npy --threshold 0.1
+python3 $src/dataset/extract_frame.py $results/AlphaGo/chinese/processed_transcript.json $results/AlphaGo/chinese/videos -o $results/AlphaGo/chinese/frames -d $results/AlphaGo/chinese/image_text_pairs
+python3 $src/dataset/extract_frame.py $results/AlphaGo/english/processed_transcript.json $results/AlphaGo/english/videos -o $results/AlphaGo/english/frames -d $results/AlphaGo/english/image_text_pairs
+
+python3 $src/dataset/extract_feature.py $results/AlphaGo/chinese/image_text_pairs -o $results/AlphaGo/chinese/features_data
+python3 $src/dataset/extract_feature.py $results/AlphaGo/english/image_text_pairs -o $results/AlphaGo/english/features_data
+
+python3 $src/dataset/find_duplicate.py $results/AlphaGo/chinese/features_data $results/AlphaGo/english/features_data -o $results/AlphaGo/pairs.json -t 0.25 -d angular
 
 #python filter_ads.py --dataset AlphaGo --folder chinese --blacklist_threshold 30 --whitelist_threshold 20

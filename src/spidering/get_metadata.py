@@ -24,13 +24,10 @@ def get_metadata(query, quantity=200, output='output', append=False, key=None, s
     desc_content_filename = os.path.join(output, 'descriptions.txt')
 
     spider = Spider(query)
-    if append:
+    if append and os.path.isfile(metadata_filename):
         spider.load(metadata_filename)
     for source in sources:
-        if source == Spider.YOUTUBE:
-            spider.get_metadata(source, quantity, key=key)
-        else:
-            spider.get_metadata(source, quantity)
+        spider.get_metadata(source, quantity, key=key)
         spider.save(metadata_filename)
 
     spider.export_query(query_filename)
@@ -38,6 +35,7 @@ def get_metadata(query, quantity=200, output='output', append=False, key=None, s
     spider.export_titles(title_content_filename, content_only=True)
     spider.export_descriptions(desc_filename)
     spider.export_descriptions(desc_content_filename, content_only=True)
+    return spider
 
 
 def main():

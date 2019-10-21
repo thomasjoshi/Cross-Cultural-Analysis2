@@ -1,124 +1,71 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 # -*- coding: UTF-8 -*-
-
-import math
-import os
-import time
 import argparse
+import json
 import numpy as np
-import matplotlib.pyplot as plt
-import matplotlib.image as mpimg
-from os import walk
-from collections import defaultdict
-
-parser = argparse.ArgumentParser(description='extract_frame: extract frames and words')
-parser.add_argument('--dataset', type=str, default="AlphaGo", help='name of the news event')
-parser.add_argument('--feature_format', type=str, default=".npy", help='format of extracted visual features')
-parser.add_argument('--threshold', type=float, default=0.1, help='threshold for picking near duplicate frames')
-opt = parser.parse_args()
-
-dataset_name = "./" + opt.dataset
-
-chi_dataset_path = dataset_name + "/" + 'chinese'
-chi_frame_path = chi_dataset_path + "/frames"
-eng_dataset_path = dataset_name + "/" + 'english'
-eng_frame_path = eng_dataset_path + "/frames"
-out_path = dataset_name + "/near_duplicate"
-
-if not os.path.exists(out_path):
-    os.makedirs(out_path)
-
-if not os.path.exists(out_path + '/chi'):
-    os.makedirs(out_path + '/chi')
-
-if not os.path.exists(out_path + '/eng'):
-    os.makedirs(out_path + '/eng')
-
-def find_similarity(A, B):
-    mse = ((A - B)**2).mean(axis=0)
-    return mse
-
-def find_filename(full_path):
-    tmp = full_path
-    while tmp.find('/') >= 0:
-        tmp = tmp[tmp.find('/')+1:]
-    return tmp
-#chi_frame_path = './test'
-#eng_frame_path = './test'
-
-# read all file in the frame path
-f_list_chi = []
-for dirpath, subdirs, files in os.walk(chi_frame_path):
-    for x in files:
-        if x.endswith(".npy"):
-            f_list_chi.append(os.path.join(dirpath, x))
-
-f_list_eng = []
-for dirpath, subdirs, files in os.walk(eng_frame_path):
-    for x in files:
-        if x.endswith(".npy"):
-            f_list_eng.append(os.path.join(dirpath, x))
-
-count = 0
-start = time.time()
-with open(out_path+'/record.txt','w+') as f:
-    for idx_chi, filename_chi in enumerate(f_list_chi):
-        print(u'Now processing: {}'.format(filename_chi))
-        feature_chi = np.load(filename_chi)
-        for idxeng, filename_eng in enumerate(f_list_eng):
-            feature_eng = np.load(filename_eng)
-
-            l2_sim = find_similarity(feature_chi,feature_eng)
-
-            if l2_sim < opt.threshold:
-                count += 1
-                img_chi = mpimg.imread(filename_chi[:-4]+'.jpg')
-                img_eng = mpimg.imread(filename_eng[:-4]+'.jpg')
-
-                '''
-                f = plt.figure()
-                f.add_subplot(1,2, 1)
-                plt.imshow(img_chi)
-                f.add_subplot(1,2, 2)
-                plt.imshow(img_eng)
-                plt.show(block=True)
+import os
+import pickle
 
 
-                save_img_chi = find_filename(filename_chi)
-                save_img_chi = out_path + '/chi/' + save_img_chi[:save_img_chi.rfind('_')] + '.jpg'
+def l1(a, b):
+    return np.sum(np.abs(a - b)).item()
 
-                save_img_eng = find_filename(filename_eng)
-                save_img_eng = out_path + '/eng/' + save_img_eng[:save_img_eng.rfind('_')] + '.jpg'
-                '''
 
-                save_img_chi = out_path + '/chi/' + str(count) + '.jpg'
-                save_img_eng = out_path + '/eng/' + str(count) + '.jpg'
+def l2(a, b):
+    return np.sqrt(np.sum((a - b) ** 2)).item()
 
-                text_chi = filename_chi.replace('frames','texts')[:-4]
-                text_chi = text_chi[:text_chi.rfind('_')] + '.txt'
 
-                text_eng = filename_eng.replace('frames','texts')[:-4]
-                text_eng = text_eng[:text_eng.rfind('_')] + '.txt'
+def angular_dist(a, b):
+    cos = a @ b / np.sqrt(np.sum(a ** 2) * np.sum(b ** 2))
+    if cos < -1:
+        cos = -1
+    if cos > 1:
+        cos = 1
+    return np.arccos(cos) / np.pi
 
-                '''
-                save_text_chi = save_img_chi.replace('frames','texts')[:-4] + '.txt'
-                save_text_eng = save_img_eng.replace('frames','texts')[:-4] + '.txt'
-                '''
 
-                save_text_chi = out_path + '/chi/' + str(count) + '.txt'
-                save_text_eng = out_path + '/eng/' + str(count) + '.txt'
+def get_duplicates(features_cn, features_en, threshold, distance):
+    distance = distance.lower()
+    if distance.startswith('l1'):
+        dist_func = l1
+    elif distance.startswith('l2'):
+        dist_func = l2
+    else:
+        dist_func = angular_dist
+    pairs = []
+    for (vid_cn, ms_cn), (image_cn, text_cn) in features_cn.items():
+        for (vid_en, ms_en), (image_en, text_en) in features_en.items():
+            d = dist_func(image_cn, image_en)
+            if d < threshold:
+                pairs.append([vid_cn, ms_cn, vid_en, ms_en, d])
+    pairs.sort(key=lambda x: x[-1])
+    return pairs
 
-                os.system(' '.join(['cp', filename_chi[:-4]+'.jpg', save_img_chi]))
-                os.system(' '.join(['cp', filename_eng[:-4]+'.jpg', save_img_eng]))
 
-                os.system(' '.join(['cp', text_chi, save_text_chi]))
-                os.system(' '.join(['cp', text_eng, save_text_eng]))
+def find_duplicate(features_path_cn, features_path_en, output_path='output.json', threshold=0.25, distance='angular'):
+    with open(features_path_cn, 'rb') as f:
+        features_cn = pickle.load(f)
+    with open(features_path_en, 'rb') as f:
+        features_en = pickle.load(f)
+    pairs = get_duplicates(features_cn, features_en, threshold, distance)
+    output_dir = os.path.dirname(output_path)
+    if not os.path.isdir(output_dir):
+        os.makedirs(output_dir)
+    with open(output_path, 'w') as f:
+        json.dump(pairs, f)
+    return pairs
 
-                f.write(filename_chi[:-4]+'.jpg'+'->'+save_img_chi+'\n')
-                f.write(filename_eng[:-4]+'.jpg'+'->'+save_img_eng+'\n')
-                f.write(text_chi+'->'+save_text_chi+'\n')
-                f.write(text_eng+'->'+save_text_eng+'\n')
-                f.write('\n')
 
-end = time.time()
-print('Total time: ' + str(round(end-start,3)) + ' seconds.')
+def main():
+    parser = argparse.ArgumentParser(description='Find nearly duplicate frames from extracted features')
+    parser.add_argument('input_cn', help='path to chinese features data file')
+    parser.add_argument('input_en', help='path to english features data file')
+    parser.add_argument('-o', '--output', default='output.json', help='path to output json file')
+    parser.add_argument('-t', '--threshold', type=float, default=0.25, help='threshold of similarity')
+    parser.add_argument('-d', '--distance', default='angular', help='distance function, can be l1, l2, angular')
+    args = parser.parse_args()
+    find_duplicate(args.input_cn, args.input_en, args.output, args.threshold, args.distance)
+
+
+if __name__ == '__main__':
+    main()

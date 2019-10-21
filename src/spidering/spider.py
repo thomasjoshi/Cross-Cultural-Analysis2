@@ -132,7 +132,7 @@ class Bilibili(ChineseExtractor):
         self.source = Spider.BILIBILI
 
     @staticmethod
-    def get_fs(query, duration=1, order=0, tids_1=0, tids_2=0):
+    def get_fs(query, duration=1, order=0, tids_1=0, tids_2=0, **kwargs):
         bilibili_orders = ['totalrank', 'click', 'pubdate', 'dm', 'stow']
         fs = f'https://search.bilibili.com/all?keyword={query}&order={bilibili_orders[order]}&' \
              f'duration={duration}&tids_1={tids_1}&tids_2={tids_2}&page=%d'
@@ -165,7 +165,7 @@ class Tencent(ChineseExtractor):
         self.source = Spider.TENCENT
 
     @staticmethod
-    def get_fs(query, duration=1):
+    def get_fs(query, duration=1, **kwargs):
         fs = f'https://v.qq.com/x/search/?q={query}&cxt=%%3Dduration%%3D{duration}&cur=%d'
         return fs
 
@@ -212,7 +212,7 @@ class Iqiyi(ChineseExtractor):
         self.source = Spider.IQIYI
 
     @staticmethod
-    def get_fs(query, duration=1):
+    def get_fs(query, duration=1, **kwargs):
         duration = duration + 1 if duration != 0 else 0
         fs = f'https://so.iqiyi.com/so/q_{query}_ctg__t_{duration + 1 if duration != 0 else 0}' + \
              '_page_%d_p_1_qc_0_rd__site_iqiyi_m_1_bitrate_'
@@ -246,7 +246,7 @@ class Youku(ChineseExtractor):
         self.source = Spider.YOUKU
 
     @staticmethod
-    def get_fs(query, duration=1):
+    def get_fs(query, duration=1, **kwargs):
         fs = f'https://so.youku.com/search_video/q_{query}?aaid=0&lengthtype={duration}&pg=%d'
         return fs
 
