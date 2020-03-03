@@ -10,7 +10,7 @@ import tensorflow as tf
 from tensorflow import keras
 
 
-tf.config.experimental.set_memory_growth(tf.config.experimental.list_physical_devices('GPU')[0], True)
+#tf.config.experimental.set_memory_growth(tf.config.experimental.list_physical_devices('GPU')[0], True)
 
 
 class Extractor:

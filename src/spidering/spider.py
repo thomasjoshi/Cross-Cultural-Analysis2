@@ -141,7 +141,7 @@ class Bilibili(ChineseExtractor):
     def extract_vids_and_urls(self, response):
         soup = BeautifulSoup(response.text, 'html.parser')
         video_items = soup.find_all('li', {'class': 'video-item matrix'})
-        vids = [v.find('span', {'class': 'type avid'}).text for v in video_items]
+        vids = [v.find('a')['href'].rsplit('/', 1)[-1].split('?')[0]  for v in video_items]
         urls = ['https://www.bilibili.com/video/' + vid for vid in vids]
         return [*zip(vids, urls)]
 
