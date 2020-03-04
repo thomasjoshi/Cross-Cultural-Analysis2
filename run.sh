@@ -3,7 +3,7 @@ src="$(dirname $0)/src"
 results="$(dirname $0)/results"
 
 # find topics
-python3 $src/analysis/find_topics.py $results/find_topics/topics_cn.txt key.txt $results/find_topics/topics_en.txt -o $results/find_topics -n 1 -f 10
+python3 $src/analysis/find_topics.py $results/find_topics/topics_cn.txt  $results/find_topics/topics_en.txt key.txt -o $results/find_topics -n 1 -f 10
 
 # get video metadata
 python3 $src/spidering/get_metadata.py "AlphaGo" -n 1 -o $results/AlphaGo/chinese/video_metadata -s bilibili qq iqiyi youku
