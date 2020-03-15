@@ -286,6 +286,11 @@ class Youtube:
         params = {'key': key, 'q': query, 'videoDuration': durations[duration], 'part': 'snippet', 'type': 'video',
                   'maxResults': 50}
 
+        # params = {'key': query, 'q': key, 'videoDuration': durations[duration], 'part': 'snippet', 'type': 'video',
+        #            'maxResults': 50}
+
+        print("param: ",params)
+
         result = {}
         while len(result) < num:
             r = requests.get(api_url, params=params)

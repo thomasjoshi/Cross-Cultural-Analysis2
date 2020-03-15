@@ -52,6 +52,7 @@ def sample_frames(input_dir, output_dir, num_frames, no_frames):
 def process_topic(topic_cn, topic_en, key, output_dir, threshold, distance, video_quantity, num_frames, no_download,
                   no_frames):
     topic_en_cleaned = ''.join(c.lower() if c.isalnum() else '-' for c in topic_en)
+    print("topic_en_cleaned:", topic_en_cleaned)
     topic_dir = os.path.join(output_dir, topic_en_cleaned)
     chinese_dir = os.path.join(topic_dir, 'chinese')
     english_dir = os.path.join(topic_dir, 'english')
@@ -77,6 +78,7 @@ def process_topic(topic_cn, topic_en, key, output_dir, threshold, distance, vide
             get_metadata(topic_cn, quantity=num, output=chinese_metadata_dir, append=True, key=key, sources=(source,))
         for i, source in enumerate(sources_en):
             num = video_quantity // len(sources_en) + (i < video_quantity % len(sources_en))
+            print("num ",num)
             get_metadata(topic_en, quantity=num, output=english_metadata_dir, append=True, key=key, sources=(source,))
         download(os.path.join(chinese_metadata_dir, 'metadata'), output=chinese_videos_dir)
         download(os.path.join(english_metadata_dir, 'metadata'), output=english_videos_dir)
@@ -109,8 +111,7 @@ def find_topics(chinese_topics, english_topics, key, output='output', threshold=
         en = f.read().splitlines()
     counts = []
     for topic_cn, topic_en in zip(cn, en):
-        pairs = process_topic(topic_cn, topic_en, key, output, threshold, distance, video_quantity, num_frames,
-                              no_download, no_frames)
+        pairs = process_topic(topic_cn, topic_en, key, output, threshold, distance, video_quantity, num_frames, no_download, no_frames)
         counts.append(len(pairs))
     plt.bar(en, counts)
     plt.show()

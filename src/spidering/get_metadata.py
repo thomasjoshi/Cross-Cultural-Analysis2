@@ -6,6 +6,7 @@ from spider import Spider
 
 
 def get_metadata(query, quantity=200, output='output', append=False, key=None, sources=None):
+    print("get_metadata.py", query, key)
     if not os.path.isdir(output):
         os.makedirs(output)
     if key and os.path.isfile(key):
@@ -16,6 +17,7 @@ def get_metadata(query, quantity=200, output='output', append=False, key=None, s
     else:
         sources = set(s.lower() for s in sources).intersection(set(Spider.ALL_SOURCES))
 
+    print("get_metadata.py", query, key)
     query_filename = os.path.join(output, 'query.txt')
     metadata_filename = os.path.join(output, 'metadata')
     title_filename = os.path.join(output, 'titles.json')
@@ -27,7 +29,8 @@ def get_metadata(query, quantity=200, output='output', append=False, key=None, s
     if append and os.path.isfile(metadata_filename):
         spider.load(metadata_filename)
     for source in sources:
-        spider.get_metadata(source, quantity, key=key)
+        print("in get_meta: ", source, key)
+        spider.get_metadata(source=source, num=quantity, key=key)
         spider.save(metadata_filename)
 
     spider.export_query(query_filename)
