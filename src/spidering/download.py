@@ -11,6 +11,14 @@ def download(input_file, output='output', sources=None):
     spider = Spider()
     spider.load(input_file)
     spider.download(output, sources)
+# def download(input_file, audio_output='audio_output', video_output='video_output', sources=None):
+#     if not os.path.isdir(video_output):
+#         os.makedirs(video_output)
+#     if not os.path.isdir(audio_output):
+#         os.makedirs(audio_output)
+#     spider = Spider()
+#     spider.load(input_file)
+#     spider.download(audio_output, video_output, sources)    
 
 
 def main():
@@ -21,6 +29,6 @@ def main():
     args = parser.parse_args()
     download(args.input, args.output, args.sources)
 
-
+ 
 if __name__ == '__main__':
     main()

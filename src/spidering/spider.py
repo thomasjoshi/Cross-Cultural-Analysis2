@@ -9,7 +9,7 @@ import subprocess
 from bs4 import BeautifulSoup
 from datetime import datetime
 
-
+# TODO: Rewrite Spider class to specifically get videos from particular videos
 class Spider:
     HEADER = {'User-Agent': 'Chrome/77.0.3865.90'}
     BILIBILI = 'bilibili'
@@ -50,14 +50,41 @@ class Spider:
             else:
                 json.dump({k: v['title'] for k, v in self.metadata.items()}, f)
 
-    def download(self, output_dir, filters=None):
-        if not os.path.isdir(output_dir):
-            os.makedirs(output_dir)
+    # def download(self, output_dir, filters=None):
+    #     if not os.path.isdir(output_dir):
+    #         os.makedirs(output_dir)
+    #     urls = {k: v['url'] for k, v in self.metadata.items() if not filters or any(s in v['url'] for s in filters)}
+    #     n = len(urls)
+    #     for i, (vid, url) in enumerate(urls.items()):
+    #         print(f'Downloading video {i + 1} / {n}')
+    #         print('Vid name: ', vid)
+    #         print('URL: ', url)
+    #         print('output_dir: ', output_dir)
+    #         subprocess.call(['you-get', '-o', output_dir, '-O', vid, url])
+    #         # subprocess.run(['you-get', '-o', output_dir, '-O', vid, url])
+            
+
+    def download(self, audio_output_dir, video_output_dir, filters=None):
+        if not os.path.isdir(video_output_dir):
+            os.makedirs(video_output_dir)
+        if not os.path.isdir(audio_output_dir):
+            os.makedirs(audio_output_dir)
         urls = {k: v['url'] for k, v in self.metadata.items() if not filters or any(s in v['url'] for s in filters)}
         n = len(urls)
         for i, (vid, url) in enumerate(urls.items()):
             print(f'Downloading video {i + 1} / {n}')
-            subprocess.call(['you-get', '-o', output_dir, '-O', vid, url])
+            # subprocess.call(['you-get', '-o', output_dir, '-O', vid, url])
+            subprocess.run(['you-get', '-o', video_output_dir, '-O', vid, url])
+            # Move file ending in [01] to audio section
+            # https://stackabuse.com/how-to-create-move-and-delete-files-in-python/
+            # os.rename
+            for file in os.listdir(video_output_dir):
+                resource = os.path.join(video_output_dir, file) 
+                new_resource = os.path.join(audio_output_dir, file)
+                if os.path.isfile(resource) and vid in file:
+                     os.rename(resource, new_resource)
+                    
+            
 
     def get_metadata(self, source, num, **kwargs):
         if source == Spider.BILIBILI:
