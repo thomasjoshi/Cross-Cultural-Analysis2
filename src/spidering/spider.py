@@ -80,9 +80,16 @@ class Spider:
             # os.rename
             for file in os.listdir(video_output_dir):
                 resource = os.path.join(video_output_dir, file) 
-                new_resource = os.path.join(audio_output_dir, file)
-                if os.path.isfile(resource) and vid in file:
-                     os.rename(resource, new_resource)
+                audio_name = vid+'[01]'
+                video_name = vid+'[00]'
+                if os.path.isfile(resource) and audio_name in file:
+                    new_file = file.replace('[01]', '')
+                    new_resource = os.path.join(audio_output_dir, new_file)
+                    os.rename(resource, new_resource)
+                elif os.path.isfile(resource) and video_name in file:
+                    new_file = file.replace('[00]', '')
+                    new_resource = os.path.join(video_output_dir, new_file)
+                    os.rename(resource, new_resource)
                     
             
 

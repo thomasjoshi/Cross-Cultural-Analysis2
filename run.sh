@@ -10,26 +10,40 @@ python3 $src/analysis/find_topics.py $results/find_topics/topics_cn.txt  $result
 echo "##############################################"
 echo "get video metadata"
 echo "##############################################"
-python3 $src/spidering/get_metadata.py "AlphaGo" -n 1 -o $results/AlphaGo/chinese/video_metadata -s bilibili qq iqiyi youku
-python3 $src/spidering/get_metadata.py "AlphaGo" -n 1 -o $results/AlphaGo/english/video_metadata -s youtube -k key.txt
+# python3 $src/spidering/get_metadata.py "AlphaGo" -n 1 -o $results/AlphaGo/chinese/video_metadata -s bilibili qq iqiyi youku
+# python3 $src/spidering/get_metadata.py "AlphaGo" -n 1 -o $results/AlphaGo/english/video_metadata -s youtube -k key.txt
+
+# python3 $src/spidering/get_metadata.py "AlphaGo" -n 3 -o $results/AlphaGo/chinese/video_metadata -s bilibili qq iqiyi youku
+# python3 $src/spidering/get_metadata.py "AlphaGo" -n 3 -o $results/AlphaGo/english/video_metadata -s youtube -k key.txt
+
+# python3 src/spidering/get_metadata.py "AlphaGo" -n 3 -o results/AlphaGo/english/video_metadata -s youtube -k key.txt
 
 echo "##############################################"
 echo "download videos"
 echo "##############################################"
-python3 $src/spidering/download.py $results/AlphaGo/chinese/video_metadata/metadata -o $results/AlphaGo/chinese/videos -s bilibili
-python3 $src/spidering/download.py $results/AlphaGo/english/video_metadata/metadata -o $results/AlphaGo/english/videos -s youtube
+# python3 $src/spidering/download.py $results/AlphaGo/chinese/video_metadata/metadata -o $results/AlphaGo/chinese/videos -s bilibili
+# python3 $src/spidering/download.py $results/AlphaGo/english/video_metadata/metadata -o $results/AlphaGo/english/videos -s youtube
 
+# python3 $src/spidering/download.py $results/AlphaGo/chinese/video_metadata/metadata -o $results/AlphaGo/chinese/audios $results/AlphaGo/chinese/videos -s bilibili
+# python3 $src/spidering/download.py $results/AlphaGo/english/video_metadata/metadata -o $results/AlphaGo/english/audios $results/AlphaGo/english/videos -s youtube
+
+
+python3 src/spidering/download.py results/AlphaGo/english/video_metadata/metadata -ao results/AlphaGo/english/audios -vo results/AlphaGo/english/videos -s youtube
 echo "##############################################"
 echo "analysis"
 echo "##############################################"
 python3 $src/analysis/count_words_cn.py $results/AlphaGo/chinese/video_metadata/titles.txt -o $results/AlphaGo/chinese/video_metadata/titles_wordcounts.txt -p $results/AlphaGo/chinese/video_metadata/titles_wordcounts.png
 python3 $src/analysis/trend.py -i $results/topics_trend/topics_2018_US.json -d $results/topics_trend/topics.txt -o $results/topics_trend/topics_data -p "AlphaGo"
 
+# python3 src/analysis/trend.py -i results/topics_trend/topics_2018_US.json -d results/topics_trend/topics.txt -o results/topics_trend/topics_data -p "Reelection of Modi"
+
 echo "##############################################"
-echo "dataset extect audios"
+echo "dataset extract audios"
 echo "##############################################"
 python3 $src/dataset/extract_audio.py $results/AlphaGo/chinese/videos -o $results/AlphaGo/chinese/audios
 python3 $src/dataset/extract_audio.py $results/AlphaGo/english/videos -o $results/AlphaGo/english/audios
+
+# python3 src/dataset/extract_audio.py results/Modi/NDTV/videos -o results/Modi/NDTV/english/audios
 
 echo "##############################################"
 echo "dataset extract transcripts"
