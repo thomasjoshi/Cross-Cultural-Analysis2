@@ -56,8 +56,8 @@ echo "##############################################"
 # python3 $src/dataset/extract_audio.py $results/AlphaGo/chinese/videos -o $results/AlphaGo/chinese/audios
 # python3 $src/dataset/extract_audio.py $results/AlphaGo/english/videos -o $results/AlphaGo/english/audios
 
-python3 $src/dataset/extract_audio.py $results/Modi/NDTV/audios -o $results/Modi/NDTV/audios
-python3 $src/dataset/extract_audio.py $results/Modi/republic_world/audios -o $results/Modi/republic_world/audios
+# python3 $src/dataset/extract_audio.py $results/Modi/NDTV/audios -o $results/Modi/NDTV/audios
+# python3 $src/dataset/extract_audio.py $results/Modi/republic_world/audios -o $results/Modi/republic_world/audios
 
 # python3 src/dataset/extract_audio.py results/Modi/NDTV/videos -o results/Modi/NDTV/english/audios
 
