@@ -79,6 +79,8 @@ def extract_feature(input_frames, output_path='output'):
 
 
 def main():
+    print('We are now in Extract Feature')
+    print('------------------------')
     parser = argparse.ArgumentParser(description='Extract features from image and text pairs')
     parser.add_argument('input', help='directory of frames or path to pairs data file')
     parser.add_argument('-o', '--output', default='output', help='path to output data file')

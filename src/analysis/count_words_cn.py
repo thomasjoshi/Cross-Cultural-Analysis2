@@ -30,6 +30,8 @@ def count(input_filename, result_filename=None, plot_filename=None):
 
 
 def main():
+    print('count words')
+    print('------------------------')
     parser = argparse.ArgumentParser(description='parse and count Chinese words')
     parser.add_argument('input', help='input text file')
     parser.add_argument('-o', '--output', help='output results')

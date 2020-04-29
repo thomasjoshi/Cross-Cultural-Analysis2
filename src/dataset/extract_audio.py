@@ -4,13 +4,22 @@ import argparse
 import os
 import subprocess
 
-
+'''
+Input:
+Process:
+Output:
+Error:
+- FileNotFoundError: [Errno 2] No such file or directory: 'ffmpeg': 'ffmpeg'
+- https://stackoverflow.com/questions/25955322/subprocess-call-ffmpeg-command-line
+- https://stackoverflow.com/questions/16748148/running-cmd-in-python-ffmpeg
+- https://docs.python.org/3/library/subprocess.html
+'''
 def extract_audio(video_dir, audio_dir='audios', audio_type='flac', sampling_rate=16000, audio_channel=1,
                   replace=False):
     if not os.path.isdir(audio_dir):
         os.makedirs(audio_dir)
-
-    for video_filename in os.listdir(video_dir):
+    video_list = os.listdir(video_dir)
+    for video_filename in video_list:
         video_path = os.path.join(video_dir, video_filename)
         if not os.path.isfile(video_path):
             continue

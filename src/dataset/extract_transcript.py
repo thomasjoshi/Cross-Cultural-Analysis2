@@ -63,13 +63,19 @@ def extract_transcript(audio_dir, key_file, gs_bucket, trans_dir='transcripts', 
     os.environ['GOOGLE_APPLICATION_CREDENTIALS'] = key_file
     transcriber = Transcriber(gs_bucket, gs_dir)
     with open(os.path.join(trans_dir, 'error_log.txt'), 'w') as f_log:
+        # Iterate through the list of files in the specified audio directory
         for audio_filename in os.listdir(audio_dir):
+            # Create path by putting the audio directory and audio file name
             audio_path = os.path.join(audio_dir, audio_filename)
+            # If the audio file does not end in the proper format or if the given path is not a true file, then skip to the next audio file
             if not (audio_filename.endswith('.' + audio_type) and os.path.isfile(audio_path)):
                 continue
+            # Return the highest index of the dot
             dot_pos = audio_filename.rfind('.')
+            # Note: The trans_type is set to json above
             transcript_filename = audio_filename[:dot_pos] + '.' + trans_type
             transcript_path = os.path.join(trans_dir, transcript_filename)
+            # If we already have created a transcript of the same name then go on to the next audio file
             if not replace and os.path.isfile(transcript_path):
                 continue
 

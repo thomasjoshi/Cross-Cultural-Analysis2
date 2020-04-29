@@ -16,7 +16,16 @@ from extract_feature import get_image_features
 from find_duplicate import get_duplicates
 from get_metadata import get_metadata
 
-
+'''
+Inputs: 
+- input_dir: we ultimately pass in chinese_videos_dir = os.path.join(chinese_dir, 'videos') and english_videos_dir = os.path.join(english_dir, 'videos')
+This tells us that the input directory tells us the specific directory of videos to sample
+We get the following error:
+OpenCV: Couldn't read video stream from file "./results/find_topics/alphago/english/videos/HT-UZkiOLv8[01].mp4"
+This may not be a problem cause this file is an audio file, and can't be analyzed. 
+Process: 
+Outputs: 
+'''
 def sample_frames(input_dir, output_dir, num_frames, no_frames):
     frame_type = 'png'
     text = ''
