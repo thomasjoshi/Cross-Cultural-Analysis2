@@ -348,7 +348,7 @@ class Youtube:
     def extract_metadata(video_item):
         url = 'https://www.youtube.com/watch?v=' + video_item['id']['videoId']
         snippet = video_item['snippet']
-        publish_time = datetime.strptime(snippet['publishedAt'][:-5], '%Y-%m-%dT%H:%M:%S')
+        publish_time = datetime.strptime(snippet['publishedAt'], '%Y-%m-%dT%H:%M:%SZ')
         metadata = {'url': url, 'title': snippet['title'], 'description': snippet['description'],
                     'publish_time': publish_time, 'poster': snippet['channelTitle']}
         return metadata
