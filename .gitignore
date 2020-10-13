@@ -45,3 +45,13 @@ embedding/text/fastText/data/
 embedding/text/fastText/result/
 embedding/text/fastText/fasttext
 canonical/cca
+
+# Exclude generated files
+results
+$results
+
+# Exclude key file
+key.txt
+
+# Exclude vscode metafile
+.vscode
