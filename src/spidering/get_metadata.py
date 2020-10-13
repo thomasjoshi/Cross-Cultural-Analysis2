@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 import argparse
 import os
-from spider import Spider
+from .spider import Spider
 
 
 def get_metadata(query, quantity=200, output='output', append=False, key=None, sources=None):

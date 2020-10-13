@@ -2,7 +2,7 @@
 # -*- coding: UTF-8 -*-
 import argparse
 import os
-from spider import Spider
+from .spider import Spider
 
 
 # def download(input_file, output='output', sources=None):
