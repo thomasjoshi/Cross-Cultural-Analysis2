@@ -55,3 +55,7 @@ key.txt
 
 # Exclude vscode metafile
 .vscode
+
+# Exclude PyCharm files
+venv/
+.idea/
