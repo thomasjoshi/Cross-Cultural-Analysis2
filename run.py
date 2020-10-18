@@ -21,9 +21,9 @@ def main():
 
     # Download videos
     profile(download, ("results/Modi/NDTV/video_metadata/metadata",
-                       "results/Modi/NDTV/audios", "results/Modi/NDTV/videos", "youtube"))
+                       "results/Modi/NDTV/audios", "results/Modi/NDTV/videos", ["youtube"]))
     profile(download, ("results/Modi/republic_world/video_metadata/metadata",
-                       "results/Modi/republic_world/audios", "results/Modi/republic_world/videos", "youtube"))
+                       "results/Modi/republic_world/audios", "results/Modi/republic_world/videos", ["youtube"]))
 
 
 if __name__ == '__main__':
