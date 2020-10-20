@@ -51,20 +51,6 @@ class Spider:
             else:
                 json.dump({k: v['title'] for k, v in self.metadata.items()}, f)
 
-    # def download(self, output_dir, filters=None):
-    #     if not os.path.isdir(output_dir):
-    #         os.makedirs(output_dir)
-    #     urls = {k: v['url'] for k, v in self.metadata.items() if not filters or any(s in v['url'] for s in filters)}
-    #     n = len(urls)
-    #     for i, (vid, url) in enumerate(urls.items()):
-    #         print(f'Downloading video {i + 1} / {n}')
-    #         print('Vid name: ', vid)
-    #         print('URL: ', url)
-    #         print('output_dir: ', output_dir)
-    #         subprocess.call(['you-get', '-o', output_dir, '-O', vid, url])
-    #         # subprocess.run(['you-get', '-o', output_dir, '-O', vid, url])
-            
-
     def download(self, audio_output_dir, video_output_dir, filters=None, delay=0, retry_times=5, retry_delay=10):
         if not os.path.isdir(video_output_dir):
             os.makedirs(video_output_dir)
@@ -261,14 +247,13 @@ class Iqiyi(ChineseExtractor):
 
     @staticmethod
     def get_fs(query, duration=1, **kwargs):
-        duration = duration + 1 if duration != 0 else 0
         fs = f'https://so.iqiyi.com/so/q_{query}_ctg__t_{duration + 1 if duration != 0 else 0}' + \
              '_page_%d_p_1_qc_0_rd__site_iqiyi_m_1_bitrate_0_af_1'
         return fs
 
     @staticmethod
     def extract_vids_and_urls(response):
-        vids = list(set(re.findall(r'/(._.*?)\.html', response.text)))
+        vids = list(set(re.findall(r'/([a-z]_[a-zA-Z0-9]*?)\.html', response.text)))
         urls = [f'https://www.iqiyi.com/{vid}.html' for vid in vids]
         return [*zip(vids, urls)]
 
