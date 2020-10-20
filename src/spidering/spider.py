@@ -263,7 +263,7 @@ class Iqiyi(ChineseExtractor):
     def get_fs(query, duration=1, **kwargs):
         duration = duration + 1 if duration != 0 else 0
         fs = f'https://so.iqiyi.com/so/q_{query}_ctg__t_{duration + 1 if duration != 0 else 0}' + \
-             '_page_%d_p_1_qc_0_rd__site_iqiyi_m_1_bitrate_'
+             '_page_%d_p_1_qc_0_rd__site_iqiyi_m_1_bitrate_0_af_1'
         return fs
 
     @staticmethod
