@@ -11,14 +11,16 @@ from .spider import Spider
 #     spider = Spider()
 #     spider.load(input_file)
 #     spider.download(output, sources)
-def download(input_file, audio_output='audio_output', video_output='video_output', sources=None):
+def download(input_file, audio_output='audio_output', video_output='video_output',
+             sources=None, delay=0, retry_times=5, retry_delay=10):
     if not os.path.isdir(video_output):
         os.makedirs(video_output)
     if not os.path.isdir(audio_output):
         os.makedirs(audio_output)
     spider = Spider()
     spider.load(input_file)
-    spider.download(audio_output, video_output, sources)    
+    spider.download(audio_output, video_output, sources, delay=delay,
+                    retry_times=retry_times, retry_delay=retry_delay)
 
 
 def main():
@@ -28,14 +30,17 @@ def main():
     # parser.add_argument('-s', '--sources', nargs='*', help='filter sources')
     # args = parser.parse_args()
     # download(args.input, args.output, args.sources)
-    parser = argparse.ArgumentParser(description='download videos using metadata')
+    parser = argparse.ArgumentParser(
+        description='download videos using metadata')
     parser.add_argument('input', help='input metadata file')
-    parser.add_argument('-ao', '--audio_output', default='audios', help='audio output directory')
-    parser.add_argument('-vo', '--video_output', default='videos', help='video output directory')
+    parser.add_argument('-ao', '--audio_output',
+                        default='audios', help='audio output directory')
+    parser.add_argument('-vo', '--video_output',
+                        default='videos', help='video output directory')
     parser.add_argument('-s', '--sources', nargs='*', help='filter sources')
     args = parser.parse_args()
     download(args.input, args.audio_output, args.video_output, args.sources)
 
- 
+
 if __name__ == '__main__':
     main()

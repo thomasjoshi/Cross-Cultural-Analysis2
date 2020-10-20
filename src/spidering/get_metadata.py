@@ -2,10 +2,12 @@
 # -*- coding: UTF-8 -*-
 import argparse
 import os
+from typing import List
 from .spider import Spider
 
 
-def get_metadata(query, quantity=200, output='output', append=False, key=None, sources=None):
+def get_metadata(query: str, quantity: int = 200, output: str = 'output',
+                 append: bool = False, key: str = None, sources: List[str] = None):
     print("get_metadata.py", query, key)
     if not os.path.isdir(output):
         os.makedirs(output)
@@ -15,7 +17,8 @@ def get_metadata(query, quantity=200, output='output', append=False, key=None, s
     if not sources:
         sources = Spider.ALL_SOURCES
     else:
-        sources = set(s.lower() for s in sources).intersection(set(Spider.ALL_SOURCES))
+        sources = set(s.lower()
+                      for s in sources).intersection(set(Spider.ALL_SOURCES))
 
     print("get_metadata.py", query, key)
     query_filename = os.path.join(output, 'query.txt')
@@ -42,15 +45,21 @@ def get_metadata(query, quantity=200, output='output', append=False, key=None, s
 
 
 def main():
-    parser = argparse.ArgumentParser(description='get metadata for Chinese videos')
+    parser = argparse.ArgumentParser(
+        description='get metadata for Chinese videos')
     parser.add_argument('query', help='the query for videos')
-    parser.add_argument('-n', '--quantity', type=int, default=200, help='number of videos to collect from each source')
-    parser.add_argument('-o', '--output', default='output', help='output directory')
-    parser.add_argument('-a', '--append', action='store_true', help='whether to append to existing data')
-    parser.add_argument('-k', '--key', help='key for Youtube API, string or path to text file')
+    parser.add_argument('-n', '--quantity', type=int, default=200,
+                        help='number of videos to collect from each source')
+    parser.add_argument('-o', '--output', default='output',
+                        help='output directory')
+    parser.add_argument('-a', '--append', action='store_true',
+                        help='whether to append to existing data')
+    parser.add_argument(
+        '-k', '--key', help='key for Youtube API, string or path to text file')
     parser.add_argument('-s', '--sources', nargs='*', help='filter sources')
     args = parser.parse_args()
-    get_metadata(args.query, args.quantity, args.output, args.append, args.key, args.sources)
+    get_metadata(args.query, args.quantity, args.output,
+                 args.append, args.key, args.sources)
 
 
 if __name__ == '__main__':

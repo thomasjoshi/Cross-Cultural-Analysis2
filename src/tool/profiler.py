@@ -26,5 +26,9 @@ def profile(func, args: tuple=None, kwargs: dict=None):
             max_memory = delta_memory
 
     end_time = time.time()
+    print("-------------------------------------------")
     print("Stats of {}:\nMax Memory: {} MB\nRuntime: {} seconds".format(
         func.__name__, round(max_memory/1000, 2), round(end_time - start_time, 2)))
+    print("-------------------------------------------")
+
+    return 

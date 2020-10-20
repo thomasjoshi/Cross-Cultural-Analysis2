@@ -8,6 +8,7 @@ def main():
     """
     The main function of the project
     """
+    # Parse arguments
     parser = argparse.ArgumentParser(description='Cross Cultural Analysis')
     parser.add_argument(
         '-k', '--key', help='key for Youtube API, string or path to text file')

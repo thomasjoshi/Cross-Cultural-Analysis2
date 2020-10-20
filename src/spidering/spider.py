@@ -6,6 +6,7 @@ import pickle
 import re
 import requests
 import subprocess
+import time
 from bs4 import BeautifulSoup
 from datetime import datetime
 
@@ -64,7 +65,7 @@ class Spider:
     #         # subprocess.run(['you-get', '-o', output_dir, '-O', vid, url])
             
 
-    def download(self, audio_output_dir, video_output_dir, filters=None):
+    def download(self, audio_output_dir, video_output_dir, filters=None, delay=0, retry_times=5, retry_delay=10):
         if not os.path.isdir(video_output_dir):
             os.makedirs(video_output_dir)
         if not os.path.isdir(audio_output_dir):
@@ -72,26 +73,39 @@ class Spider:
         urls = {k: v['url'] for k, v in self.metadata.items() if not filters or any(s in v['url'] for s in filters)}
         n = len(urls)
         for i, (vid, url) in enumerate(urls.items()):
-            print(f'Downloading video {i + 1} / {n}')
-            # subprocess.call(['you-get', '-o', output_dir, '-O', vid, url])
-            subprocess.run(['you-get', '-o', video_output_dir, '-O', vid, url])
-            # Move file ending in [01] to audio section
-            # https://stackabuse.com/how-to-create-move-and-delete-files-in-python/
-            # os.rename
-            for file in os.listdir(video_output_dir):
-                resource = os.path.join(video_output_dir, file) 
-                audio_name = vid+'[01]'
-                video_name = vid+'[00]'
-                if os.path.isfile(resource) and audio_name in file:
-                    new_file = file.replace('[01]', '')
-                    new_resource = os.path.join(audio_output_dir, new_file)
-                    os.rename(resource, new_resource)
-                elif os.path.isfile(resource) and video_name in file:
-                    new_file = file.replace('[00]', '')
-                    new_resource = os.path.join(video_output_dir, new_file)
-                    os.rename(resource, new_resource)
-                    
-            
+            for j in range(retry_times):
+                # Delay the download if the video is not the first one. Such delay might be needed due to website restrictions.
+                if i > 0 and delay > 0 and j <= 0:
+                    print("Dealy the download by {} seconds".format(delay))
+                    time.sleep(delay)
+
+                print(f'Downloading video {i + 1} / {n}')
+                result = subprocess.run(['you-get', '-o', video_output_dir, '-O', vid, url])
+                
+                # Retry if return code is not 0, meaning the download failed
+                if result.returncode != 0:
+                    if j < retry_times - 1:
+                        print("Download failed. Retry in {} seconds".format(retry_times))
+                        time.sleep(retry_delay)
+                    continue
+                else:
+                    # Move file ending in [01] to audio section
+                    # https://stackabuse.com/how-to-create-move-and-delete-files-in-python/
+                    # os.rename
+                    for file in os.listdir(video_output_dir):
+                        resource = os.path.join(video_output_dir, file) 
+                        audio_name = vid+'[01]'
+                        video_name = vid+'[00]'
+                        if os.path.isfile(resource) and audio_name in file:
+                            new_file = file.replace('[01]', '')
+                            new_resource = os.path.join(audio_output_dir, new_file)
+                            os.rename(resource, new_resource)
+                        elif os.path.isfile(resource) and video_name in file:
+                            new_file = file.replace('[00]', '')
+                            new_resource = os.path.join(video_output_dir, new_file)
+                            os.rename(resource, new_resource)
+                    break
+
 
     def get_metadata(self, source, num, **kwargs):
         if source == Spider.BILIBILI:
